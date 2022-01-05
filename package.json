@@ -1,0 +1,34 @@
+{
+  "name": "passwords-sqnfa-web",
+  "version": "0.1.0",
+  "description": "Passwords are sine qua non for applications - also the for the web. This package aims to preprocess passwords in the browser before they are sent to the backend. It is not a substitute for proper handling of passwords in the backend. This is just an extra layer.",
+  "main": "build/src/index.js",
+  "types": "build/src/index.d.ts",
+  "files": [
+    "build/src"
+  ],
+  "license": "Apache-2.0",
+  "keywords": [
+    "password",
+    "crypto",
+    "haveibeenpwned"
+  ],
+  "scripts": {
+    "test": "jest",
+    "lint": "gts lint",
+    "clean": "gts clean",
+    "compile": "tsc",
+    "fix": "gts fix",
+    "prepare": "npm run compile",
+    "pretest": "npm run fix && npm run compile",
+    "posttest": "npm run clean"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.4.0",
+    "@types/node": "^14.11.2",
+    "gts": "^3.1.0",
+    "jest": "^27.4.7",
+    "ts-jest": "^27.1.2",
+    "typescript": "^4.0.3"
+  }
+}
