@@ -1,39 +1,50 @@
+export interface Failure {
+  handler: string;
+  rule: string;
+  expected: number;
+  actual: number;
+}
+
 export class Result {
-  public isSuccess: boolean;
-  public error: string | null;
-  private password: string | null;
+  private failures?: Failure[];
 
   private constructor(
-    isSuccess: boolean,
-    error: string | null,
-    password: string | null
+    readonly isSuccess: boolean,
+    failure?: Failure | Failure[],
+    private password?: string
   ) {
-    this.isSuccess = isSuccess;
-    this.error = error;
-    this.password = password;
-
-    Object.freeze(this);
+    if (failure) {
+      if (failure instanceof Array) {
+        this.failures = failure;
+      } else {
+        this.failures = [failure];
+      }
+    }
   }
 
   public getPassword(): string {
-    if (!this.isSuccess) {
+    if (!this.isSuccess || !this.password) {
       throw new Error(
         'Invalid operation: Cannot retreive the password from a failed result.'
-      );
-    }
-    if (!this.password) {
-      throw new Error(
-        'Runtime error: Password not set on a successful result.'
       );
     }
     return this.password;
   }
 
-  public static ok(password: string) {
-    return new Result(true, null, password);
+  public getFailures(): Failure[] {
+    if (this.isSuccess || !this.failures) {
+      throw new Error(
+        'Invalid operation: Cannot retreive the failure from a successful result.'
+      );
+    }
+    return this.failures;
   }
 
-  public static fail(error: string) {
-    return new Result(false, error, null);
+  public static ok(password: string) {
+    return new Result(true, undefined, password);
+  }
+
+  public static fail(failure: Failure | Failure[]) {
+    return new Result(false, failure, undefined);
   }
 }
