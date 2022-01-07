@@ -1,5 +1,5 @@
 import {Result} from './result';
-import {Handler, HaveibeenpwnedHttpClient} from './sqnfa';
+import {Handler, HaveibeenpwnedHttpClient} from './types/sqnfa';
 import * as jshashes from 'jshashes';
 
 export class HaveibeenpwnedConfiguration {

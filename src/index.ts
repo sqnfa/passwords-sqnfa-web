@@ -1,5 +1,5 @@
 import {Failure, Result} from './result';
-import {Handler} from './sqnfa';
+import {Handler} from './types/sqnfa';
 
 export class PasswordsSqnfaWeb implements Handler {
   public readonly name = 'PasswordsSqnfaWeb';

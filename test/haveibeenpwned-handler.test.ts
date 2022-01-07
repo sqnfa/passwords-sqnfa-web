@@ -2,7 +2,7 @@ import {
   HaveibeenpwnedConfiguration,
   HaveibeenpwnedHandler,
 } from '../src/haveibeenpwned-handler';
-import {HaveibeenpwnedHttpClient} from '../src/sqnfa';
+import {HaveibeenpwnedHttpClient} from '../src/types/sqnfa';
 
 class MockHttpClient implements HaveibeenpwnedHttpClient {
   /**

@@ -1,5 +1,5 @@
 import {Result} from './result';
-import {Handler} from './sqnfa';
+import {Handler} from './types/sqnfa';
 
 export class LengthConfiguration {
   /**
