@@ -1,4 +1,4 @@
-import {BcryptHandler} from '../src/bcrypt-handler';
+import {BcryptHandler} from '../../src/handlers/bcrypt-handler';
 
 describe('a valid password', () => {
   const handler = new BcryptHandler({salt: '$2a$12$RNbCt.Je2GAP4ub8FyX5le'});

@@ -1,4 +1,4 @@
-import {LengthHandler} from '../src/length-handler';
+import {LengthHandler} from '../../src/handlers/length-handler';
 
 describe('a valid password', () => {
   const handler = new LengthHandler();

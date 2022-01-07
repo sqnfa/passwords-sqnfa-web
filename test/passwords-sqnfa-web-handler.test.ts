@@ -1,5 +1,5 @@
 import {PasswordsSqnfaWeb} from '../src/index';
-import {LengthHandler} from '../src/length-handler';
+import {LengthHandler} from '../src/handlers/length-handler';
 
 describe('a successful handling with the chain of responsibility', () => {
   const handler = new PasswordsSqnfaWeb()
