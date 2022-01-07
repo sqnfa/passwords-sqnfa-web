@@ -1,5 +1,3 @@
-import {BcryptHandler} from './bcrypt-handler';
-import {LengthHandler} from './length-handler';
 import {Failure, Result} from './result';
 import {Handler} from './sqnfa';
 
@@ -44,11 +42,3 @@ export class PasswordsSqnfaWeb implements Handler {
     return this.failures;
   }
 }
-
-export const test = new PasswordsSqnfaWeb()
-  .use(new LengthHandler())
-  .use(new BcryptHandler({salt: '$2a$12$RNbCt.Je2GAP4ub8FyX5le'}));
-console.log(test.handle('correct'));
-console.log(test.getFailures());
-//console.log(test.handle('correct horse battery staple'));
-//console.log(test.getFailures());

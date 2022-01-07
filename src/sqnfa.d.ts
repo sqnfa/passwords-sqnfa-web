@@ -12,3 +12,7 @@ export interface Handler {
    */
   name: string;
 }
+
+export interface HaveibeenpwnedHttpClient {
+  get(url: string): string[];
+}
