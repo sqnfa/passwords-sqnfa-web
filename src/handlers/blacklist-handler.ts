@@ -43,7 +43,6 @@ export class BlacklistHandler implements Handler {
       for (const entry in this.config.regExps) {
         if (Object.prototype.hasOwnProperty.call(this.config.regExps, entry)) {
           const regExp = this.config.regExps[entry];
-          console.log(password, regExp, regExp.test(password));
           if (regExp.test(password)) {
             return Result.fail({
               handler: this.name,
