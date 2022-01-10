@@ -31,7 +31,7 @@
     "electronic credentials"
   ],
   "scripts": {
-    "test": "jest --verbose=true",
+    "test": "jest --maxWorkers=1 --verbose=true",
     "lint": "gts lint",
     "clean": "gts clean",
     "compile": "webpack",
