@@ -5,7 +5,7 @@ export class LengthConfiguration {
   /**
    * The minimum number of characters in the password.
    */
-  public minLength = 10;
+  public minLength = 8;
   /**
    * The maximum number of bytes the password is represented in UTF8 code units.
    * Note that bcrypt has a password limit of 72 bytes.
@@ -19,7 +19,14 @@ export class LengthHandler implements Handler {
   public readonly name: string = 'LengthHandler';
 
   /**
-   * Initializes the instance with the given config.
+   * NIST 800-63B:
+   * Password length has been found to be a primary factor in characterizing
+   * password strength. [...] Extremely long passwords (perhaps megabytes in
+   * length) could conceivably require excessive processing time to hash, so
+   * it is reasonable to have some limit. [...] Accordingly, at LOA2,
+   * SP 800-63-2 permitted the use of randomly generated PINs with 6 or more 
+   * digits while requiring user-chosen memorized secrets to be a minimum of
+   * 8 characters long.
    */
   constructor(config?: LengthConfiguration) {
     if (!config) {
@@ -28,6 +35,13 @@ export class LengthHandler implements Handler {
     this.config = config;
   }
 
+  /**
+   * Checks that the password is minimum minLength and takes up at most
+   * maxBytesSize encoded in UTF-8.
+   * 
+   * @param password The password to check.
+   * @returns Successful result is within the limits or a failure otherwise.
+   */
   public handle(password: string): Result {
     if (password.length < this.config.minLength) {
       return Result.fail({
@@ -38,6 +52,7 @@ export class LengthHandler implements Handler {
       });
     }
 
+    // TODO: Omit calling utf8Length if the password cannot be longer.
     const size = this.utf8Length(password);
     if (size > this.config.maxByteSize) {
       return Result.fail({
