@@ -1,5 +1,5 @@
 import {Result} from '../result';
-import {Handler} from '../types/sqnfa';
+import {HandlerSync} from '../types/sqnfa';
 
 export class LengthConfiguration {
   /**
@@ -8,12 +8,11 @@ export class LengthConfiguration {
   public minLength = 8;
   /**
    * The maximum number of bytes the password is represented in UTF8 code units.
-   * Note that bcrypt has a password limit of 72 bytes.
    */
   public maxByteSize = 72;
 }
 
-export class LengthHandler implements Handler {
+export class LengthHandler implements HandlerSync {
   private config: LengthConfiguration;
 
   public readonly name: string = 'LengthHandler';
@@ -24,7 +23,7 @@ export class LengthHandler implements Handler {
    * password strength. [...] Extremely long passwords (perhaps megabytes in
    * length) could conceivably require excessive processing time to hash, so
    * it is reasonable to have some limit. [...] Accordingly, at LOA2,
-   * SP 800-63-2 permitted the use of randomly generated PINs with 6 or more 
+   * SP 800-63-2 permitted the use of randomly generated PINs with 6 or more
    * digits while requiring user-chosen memorized secrets to be a minimum of
    * 8 characters long.
    */
@@ -38,11 +37,11 @@ export class LengthHandler implements Handler {
   /**
    * Checks that the password is minimum minLength and takes up at most
    * maxBytesSize encoded in UTF-8.
-   * 
+   *
    * @param password The password to check.
    * @returns Successful result is within the limits or a failure otherwise.
    */
-  public handle(password: string): Result {
+  public handleSync(password: string): Result {
     if (password.length < this.config.minLength) {
       return Result.fail({
         rule: 'minLength',

@@ -1,0 +1,41 @@
+
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Passwords are SQN for web</title>
+</head>
+
+<body>
+  <!-- your content here... -->
+  <script src="../build/passwords-sqnfa-web.min.js"></script>
+  <script type="text/javascript">
+      let httpClient = {
+        get: async function(url) {
+            let response = await fetch(url, {method: 'GET', headers: {'Add-Padding': 'true'}});
+            let passwords = await response.text();
+            
+            return passwords.split(/\r?\n/)
+
+        }
+      }
+
+      let handler = new PasswordsSqnfaWeb.PasswordsSqnfaWeb()
+         .useLengthHandler()
+         .useBlackListHandler({caseInsensitiveWords: ['password', 'pass', 'qwerty', '123456', '1qaz', '2wsx'], regExps: [new RegExp(/.*[s5]qnf[a4].*/)]}, true)
+         .useHaveibeenpwnedHandler({pwnedPasswordsUrl: 'https://api.pwnedpasswords.com/range/', httpClient: httpClient})
+         .useSha512Handler()
+         .useBcryptHandler({salt: '$2a$12$RNbCt.Je2GAP4ub8FyX5le'});
+      
+      (async function() {
+        console.log('Result for 1qaz:', await handler.handle('1qaz'));
+        console.log('Result for tr0ub4dor&3:', await handler.handle('tr0ub4dor&3'));
+        console.log('Result for @ecgS=C63fz>}f`b3_G3:', await handler.handle('@ecgS=C63fz>}f`b3_G3'));
+      })();
+
+  </script>
+</body>
+</html>

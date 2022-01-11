@@ -4,7 +4,7 @@ import {
 } from '../../src/handlers/haveibeenpwned-handler';
 import {HaveibeenpwnedHttpClient} from '../../src/types/sqnfa';
 
-class MockHttpClient implements HaveibeenpwnedHttpClient {
+export class MockHttpClient implements HaveibeenpwnedHttpClient {
   /**
    * Mocking a call to the Pwned Passwords API.
    *
@@ -14,13 +14,13 @@ class MockHttpClient implements HaveibeenpwnedHttpClient {
    * @param url The URL to search by a partial hash for 28139.
    * @returns A snippet of the real response.
    */
-  public get(url: string): string[] {
+  public get(url: string): Promise<string[]> {
     if (!url.endsWith('28139')) {
       throw new Error(
         'This is a mock, please use the proper range identifier.'
       );
     }
-    return [
+    return Promise.resolve([
       '7A30ADC83D7691025DE549A05759E6D822A:6',
       '7AA7421C63EA988F9012997E9E752B5E0FA:1',
       '7ADF36C33CB03CDDA4E73ACB31E93054D69:166',
@@ -37,7 +37,7 @@ class MockHttpClient implements HaveibeenpwnedHttpClient {
       '7F5D93088F9CEE5180568EEDA5C249AE2AF:1',
       '7FB4885BC540D70911FF945A2C1D9481D1C:1',
       '7FC66358E06E8BEA35F4F0F6C9605939E9A:2',
-    ];
+    ]);
   }
 }
 
@@ -51,8 +51,8 @@ const handler = new HaveibeenpwnedHandler(
 );
 
 describe('a leaked password', () => {
-  it('should fail the check.', () => {
-    const result = handler.handle(pwnedPassword);
+  it('should fail the check.', async () => {
+    const result = await handler.handle(pwnedPassword);
     const failures = result.getFailures();
 
     expect(failures).toHaveLength(1);
@@ -64,8 +64,8 @@ describe('a leaked password', () => {
 });
 
 describe('a valid password', () => {
-  it('should yield the same password.', () => {
-    const result = handler.handle(okPassword);
+  it('should yield the same password.', async () => {
+    const result = await handler.handle(okPassword);
 
     expect(result.getPassword()).toEqual(okPassword);
   });

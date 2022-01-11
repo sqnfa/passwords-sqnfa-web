@@ -1,20 +1,20 @@
 import {Result} from '../result';
-import {Handler} from '../types/sqnfa';
+import {HandlerSync} from '../types/sqnfa';
 import {hashSync} from 'bcryptjs';
 
 export class BcryptConfiguration {
   constructor(readonly salt: string) {}
 }
 
-export class BcryptHandler implements Handler {
+export class BcryptHandler implements HandlerSync {
   public readonly name: string = 'BcryptHandler';
 
   /**
-   * Initializes the instance with the given config.
+   * Can be used
    */
   constructor(private readonly config: BcryptConfiguration) {}
 
-  public handle(password: string): Result {
+  public handleSync(password: string): Result {
     const hash = hashSync(password, this.config.salt);
     return Result.ok(hash);
   }

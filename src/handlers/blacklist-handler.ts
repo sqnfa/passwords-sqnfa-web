@@ -1,5 +1,5 @@
 import {Result} from '../result';
-import {Handler} from '../types/sqnfa';
+import {HandlerSync} from '../types/sqnfa';
 
 export class BlacklistConfiguration {
   /**
@@ -17,12 +17,26 @@ export class BlacklistConfiguration {
   ) {}
 }
 
-export class BlacklistHandler implements Handler {
+export class BlacklistHandler implements HandlerSync {
   public readonly name: string = 'BlacklistHandler';
 
+  /**
+   * NIST 800-63B:
+   * Password complexity: Users’ password choices are very predictable,
+   * so attackers are likely to guess passwords that have been successful
+   * in the past. For this reason, it is recommended that passwords chosen
+   * by users be compared against a “black list” of unacceptable passwords.
+   * This list should include dictionary words, and specific words (such as
+   * the name of the service itself) that users are likely to choose.
+   *
+   * This handler black lists passwords containing parts of black listed words
+   * or passwords that matches defined regular expressions. One or more e-mail
+   * addresses can be added. The e-mail is tokenized and each token is added
+   * to the black list.
+   */
   constructor(private readonly config: BlacklistConfiguration) {}
 
-  public handle(password: string): Result {
+  public handleSync(password: string): Result {
     const upperCasePassword = password.toLocaleUpperCase();
     const containsCaseInsensitveWord = this.config.caseInsensitiveWords.some(
       word => upperCasePassword.indexOf(word.toLocaleUpperCase()) >= 0
@@ -52,33 +66,86 @@ export class BlacklistHandler implements Handler {
   }
 
   /**
-   * addEmailInformation
+   * Adds information about the e-mail. The e-mail is tokenized and each token
+   * is added to the black list.
+   *
+   * Example: john.doe@example.com
+   *
+   *   Tokens: john, example
+   *   (Note that doe is below minTokenLength)
+   *
+   * Sliding windows 4:
+   *
+   *   Tokens: john, example, ohn., hn.d, n.do, .doe, exam, xamp, ampl, mple
+   *
+   * @param email The e-mail that should be black listed.
+   * @param slidingWindowSize If positive non-zero: Adds words of the size provided sliding accross the e-mail.
+   * @param minTokenLength A safe-gaurd to not let the black list be too restricted.
    */
   public addEmailInformation(
     email: string,
     slidingWindowSize = 0,
-    minTokenLength = 2
+    minTokenLength = 4
   ): void {
-    const tokens = email.split(/[@!#$%&'*+-/=?^_`{|]+/);
-    tokens.pop();
+    const words = new Set<string>();
+    const parts = email.split('@'),
+      localTokens = parts[0].split(/[!#$%&'*+-/=?^_`{|]+/),
+      domainTokens = parts[1].split(/[!#$%&'*+-/=?^_`{|]+/);
+    const lastTld = domainTokens.pop();
 
-    tokens.forEach(token => this.addToken(token, minTokenLength));
+    localTokens.forEach(token => words.add(token));
+    domainTokens.forEach(token => words.add(token));
 
     if (slidingWindowSize > 0) {
-      tokens.forEach(token => {
-        const maxIndex = token.length - slidingWindowSize + 1;
-        for (let index = 0; index < maxIndex; index++) {
-          this.addToken(
-            token.substring(index, index + slidingWindowSize),
-            minTokenLength
-          );
-        }
+      // Process each token
+      localTokens.forEach(token => {
+        this.addSlidingWindowWords(token, slidingWindowSize, words);
       });
+      domainTokens.forEach(token => {
+        this.addSlidingWindowWords(token, slidingWindowSize, words);
+      });
+
+      // Proccess the token joined together
+      this.addSlidingWindowWords(
+        localTokens.join(''),
+        slidingWindowSize,
+        words
+      );
+      this.addSlidingWindowWords(
+        domainTokens.join(''),
+        slidingWindowSize,
+        words
+      );
+
+      // Process the original local part of the e-mail
+      this.addSlidingWindowWords(parts[0], slidingWindowSize, words);
+      // Process the original domain part of the e-mail
+      let domainPart = parts[1];
+      if (lastTld) {
+        domainPart = domainPart.substring(
+          0,
+          domainPart.length - lastTld.length - 1
+        );
+      }
+      this.addSlidingWindowWords(domainPart, slidingWindowSize, words);
+    }
+    // Add all words to the caseInsensitiveWords configuration that are longer than minTokenLength
+    words.forEach(word => this.addWord(word, minTokenLength));
+  }
+
+  private addSlidingWindowWords(
+    token: string,
+    slidingWindowSize: number,
+    words: Set<string>
+  ) {
+    const maxIndex = token.length - slidingWindowSize + 1;
+    for (let index = 0; index < maxIndex; index++) {
+      words.add(token.substring(index, index + slidingWindowSize));
     }
   }
 
-  private addToken(token: string, minLength: number) {
-    if (token.length > minLength) {
+  private addWord(token: string, minLength: number) {
+    if (token.length >= minLength) {
       this.config.caseInsensitiveWords.push(token);
     }
   }

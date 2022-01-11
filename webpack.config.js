@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = {
-  entry: './src/index.ts',
+  entry: ['./src/index.ts'],
   mode: 'production',
   devtool: 'source-map',
   target: ['web', 'es5'],
@@ -22,5 +22,7 @@ module.exports = {
   output: {
     filename: 'passwords-sqnfa-web.min.js',
     path: path.resolve(__dirname, 'build'),
+    libraryTarget: 'var',
+    library: 'PasswordsSqnfaWeb',
   },
 };

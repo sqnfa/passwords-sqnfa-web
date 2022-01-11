@@ -5,7 +5,7 @@ describe('a valid password', () => {
   it('should return the original password in the result.', () => {
     const password = 'MyPassword';
 
-    const result = handler.handle(password);
+    const result = handler.handleSync(password);
 
     expect(result.isSuccess).toBeTruthy();
     expect(result.getPassword()).toBe(password);
@@ -19,19 +19,19 @@ describe('an invalid password', () => {
   it('should reject short passwords.', () => {
     const handler = new LengthHandler();
 
-    const result = handler.handle(threeWiseMonkeys);
+    const result = handler.handleSync(threeWiseMonkeys);
     const failures = result.getFailures();
 
     expect(failures).toHaveLength(1);
     expect(failures[0].rule).toBe('minLength');
-    expect(failures[0].expected).toBe(10);
+    expect(failures[0].expected).toBe(8);
     expect(failures[0].actual).toBe(6);
   });
 
   it('should reject large passwords.', () => {
     const handler = new LengthHandler({minLength: 3, maxByteSize: 10});
 
-    const result = handler.handle(threeWiseMonkeys);
+    const result = handler.handleSync(threeWiseMonkeys);
     const failures = result.getFailures();
 
     expect(failures).toHaveLength(1);

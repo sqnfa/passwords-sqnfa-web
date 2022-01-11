@@ -12,7 +12,7 @@ const handler = new BlacklistHandler(config);
 describe('a valid password', () => {
   const password = 'MyPassword';
   it('should return the original password in the result.', () => {
-    const result = handler.handle(password);
+    const result = handler.handleSync(password);
     expect(result.isSuccess).toBeTruthy();
     expect(result.getPassword()).toBe(password);
   });
@@ -23,7 +23,7 @@ describe('a valid password', () => {
       regExps: [],
     });
 
-    const result = emptyHandler.handle(password);
+    const result = emptyHandler.handleSync(password);
 
     expect(result.isSuccess).toBeTruthy();
     expect(result.getPassword()).toBe(password);
@@ -32,7 +32,7 @@ describe('a valid password', () => {
 
 describe('an invalid password', () => {
   it('should reject banned words.', () => {
-    const result = handler.handle("I'm a TrouBad m4ker");
+    const result = handler.handleSync("I'm a TrouBad m4ker");
     const failures = result.getFailures();
 
     expect(failures).toHaveLength(1);
@@ -42,7 +42,7 @@ describe('an invalid password', () => {
   });
 
   it('should reject banned words when the password starts with it.', () => {
-    const result = handler.handle('trouBADour');
+    const result = handler.handleSync('trouBADour');
     const failures = result.getFailures();
 
     expect(failures).toHaveLength(1);
@@ -52,7 +52,7 @@ describe('an invalid password', () => {
   });
 
   it('should reject banned regular expressions.', () => {
-    const result = handler.handle('tr0ub4dor&3');
+    const result = handler.handleSync('tr0ub4dor&3');
     const failures = result.getFailures();
 
     expect(failures).toHaveLength(1);
@@ -69,9 +69,13 @@ describe('when adding an e-mail to the blacklist', () => {
       regExps: [],
     });
 
-    emptyHandler.addEmailInformation('john-doe@company.example.com');
+    emptyHandler.addEmailInformation(
+      'john-doe@company.example.com',
+      undefined,
+      3
+    );
     ['john', 'doe', 'company', 'example'].forEach(password => {
-      const result = emptyHandler.handle(password);
+      const result = emptyHandler.handleSync(password);
 
       const failures = result.getFailures();
       expect(failures).toHaveLength(1);
@@ -88,7 +92,7 @@ describe('when adding an e-mail to the blacklist', () => {
     });
     emptyHandler.addEmailInformation('john-doe@company.example.com');
 
-    const result = emptyHandler.handle('com');
+    const result = emptyHandler.handleSync('com');
 
     expect(result.isSuccess).toBeTruthy();
   });
@@ -102,7 +106,6 @@ describe('when adding an e-mail to the blacklist', () => {
 
     [
       'john',
-      'doe',
       'company',
       'example',
       'compa',
@@ -111,8 +114,24 @@ describe('when adding an e-mail to the blacklist', () => {
       'examp',
       'xampl',
       'ample',
+      'johnd',
+      'ohndo',
+      'hndoe',
+      'panye',
+      'anyex',
+      'nyexa',
+      'yexam',
+      'john-',
+      'ohn-d',
+      'hn-do',
+      'n-doe',
+      'pany.',
+      'any.e',
+      'ny.ex',
+      'y.exa',
+      '.exam',
     ].forEach(password => {
-      const result = emptyHandler.handle(password);
+      const result = emptyHandler.handleSync(password);
 
       const failures = result.getFailures();
       expect(failures).toHaveLength(1);
@@ -127,10 +146,12 @@ describe('when adding an e-mail to the blacklist', () => {
       caseInsensitiveWords: [],
       regExps: [],
     });
-    emptyHandler.addEmailInformation('john-doe@eu.example.com', undefined, 2);
+    emptyHandler.addEmailInformation('john-doe@eu.example.com');
 
-    const result = emptyHandler.handle('eu');
+    ['eu', 'doe'].forEach(password => {
+      const result = emptyHandler.handleSync(password);
 
-    expect(result.isSuccess).toBeTruthy();
+      expect(result.isSuccess).toBeTruthy();
+    });
   });
 });
