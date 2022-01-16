@@ -23,7 +23,8 @@ export class BcryptHandler implements Handler {
    *
    * Note: Bcrypt limits the password length to be 72 encoded in utf-8.
    * Should the users password be longer than this, then the password
-   * will be hashed with SHA512/432 and encoded in base64.
+   * will be hashed with SHA512/432 and encoded in base64 before being 
+   * hashed by bcrypt.
    */
   constructor(private readonly config: BcryptConfiguration) {}
 
