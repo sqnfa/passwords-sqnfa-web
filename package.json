@@ -32,6 +32,7 @@
   ],
   "scripts": {
     "test": "jest --maxWorkers=1 --verbose=true",
+    "test:coverage": "jest --maxWorkers=1 --coverage",
     "lint": "gts lint",
     "clean": "gts clean",
     "compile": "webpack",

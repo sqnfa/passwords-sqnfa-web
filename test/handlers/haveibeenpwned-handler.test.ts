@@ -15,7 +15,7 @@ export class MockHttpClient implements HaveibeenpwnedHttpClient {
    * @returns A snippet of the real response.
    */
   public get(url: string): Promise<string[]> {
-    if (!url.endsWith('28139')) {
+    if (!url.endsWith('28139') && !url.endsWith('DA39A')) {
       throw new Error(
         'This is a mock, please use the proper range identifier.'
       );

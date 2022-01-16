@@ -17,8 +17,10 @@ export class BlacklistConfiguration {
   ) {}
 }
 
-export class BlacklistHandler implements HandlerSync {
-  public readonly name: string = 'BlacklistHandler';
+export class BlackListHandler implements HandlerSync {
+  public readonly name: string = 'BlackListHandler';
+
+  private emailTokens: string[] = [];
 
   /**
    * NIST 800-63B:
@@ -45,6 +47,18 @@ export class BlacklistHandler implements HandlerSync {
       return Result.fail({
         handler: this.name,
         rule: 'caseInsensitiveWords',
+        expected: 0,
+        actual: 1,
+      });
+    }
+
+    const containsEmailTokens = this.emailTokens.some(
+      token => upperCasePassword.indexOf(token.toLocaleUpperCase()) >= 0
+    );
+    if (containsEmailTokens) {
+      return Result.fail({
+        handler: this.name,
+        rule: 'emailTokens',
         expected: 0,
         actual: 1,
       });
@@ -130,7 +144,7 @@ export class BlacklistHandler implements HandlerSync {
       this.addSlidingWindowWords(domainPart, slidingWindowSize, words);
     }
     // Add all words to the caseInsensitiveWords configuration that are longer than minTokenLength
-    words.forEach(word => this.addWord(word, minTokenLength));
+    words.forEach(word => this.addToken(word, minTokenLength));
   }
 
   private addSlidingWindowWords(
@@ -144,9 +158,9 @@ export class BlacklistHandler implements HandlerSync {
     }
   }
 
-  private addWord(token: string, minLength: number) {
+  private addToken(token: string, minLength: number) {
     if (token.length >= minLength) {
-      this.config.caseInsensitiveWords.push(token);
+      this.emailTokens.push(token);
     }
   }
 }

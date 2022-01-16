@@ -23,7 +23,7 @@ export class Result {
   }
 
   public getPassword(): string {
-    if (!this.isSuccess || !this.password) {
+    if (!this.isSuccess || this.password === undefined) {
       throw new Error(
         'Invalid operation: Cannot retreive the password from a failed result.'
       );

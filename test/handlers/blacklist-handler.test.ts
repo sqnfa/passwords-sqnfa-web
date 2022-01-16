@@ -1,5 +1,5 @@
 import {
-  BlacklistHandler,
+  BlackListHandler,
   BlacklistConfiguration,
 } from '../../src/handlers/blacklist-handler';
 // https://xkcd.com/936/
@@ -7,7 +7,7 @@ const config = new BlacklistConfiguration(
   ['troubaD'],
   [new RegExp(/tr[o0]ub[a4]dor[u&][r3]/i)]
 );
-const handler = new BlacklistHandler(config);
+const handler = new BlackListHandler(config);
 
 describe('a valid password', () => {
   const password = 'MyPassword';
@@ -18,7 +18,7 @@ describe('a valid password', () => {
   });
 
   it('should be valid when no case insensitive words are provided.', () => {
-    const emptyHandler = new BlacklistHandler({
+    const emptyHandler = new BlackListHandler({
       caseInsensitiveWords: [],
       regExps: [],
     });
@@ -64,7 +64,7 @@ describe('an invalid password', () => {
 
 describe('when adding an e-mail to the blacklist', () => {
   it('should add all tokens to the blacklist.', () => {
-    const emptyHandler = new BlacklistHandler({
+    const emptyHandler = new BlackListHandler({
       caseInsensitiveWords: [],
       regExps: [],
     });
@@ -79,14 +79,14 @@ describe('when adding an e-mail to the blacklist', () => {
 
       const failures = result.getFailures();
       expect(failures).toHaveLength(1);
-      expect(failures[0].rule).toBe('caseInsensitiveWords');
+      expect(failures[0].rule).toBe('emailTokens');
       expect(failures[0].expected).toBe(0);
       expect(failures[0].actual).toBe(1);
     });
   });
 
   it('should allow the tld to be used.', () => {
-    const emptyHandler = new BlacklistHandler({
+    const emptyHandler = new BlackListHandler({
       caseInsensitiveWords: [],
       regExps: [],
     });
@@ -98,7 +98,7 @@ describe('when adding an e-mail to the blacklist', () => {
   });
 
   it('should block partial words based on a sliding window.', () => {
-    const emptyHandler = new BlacklistHandler({
+    const emptyHandler = new BlackListHandler({
       caseInsensitiveWords: [],
       regExps: [],
     });
@@ -135,14 +135,14 @@ describe('when adding an e-mail to the blacklist', () => {
 
       const failures = result.getFailures();
       expect(failures).toHaveLength(1);
-      expect(failures[0].rule).toBe('caseInsensitiveWords');
+      expect(failures[0].rule).toBe('emailTokens');
       expect(failures[0].expected).toBe(0);
       expect(failures[0].actual).toBe(1);
     });
   });
 
   it('should allow short words in the e-mail.', () => {
-    const emptyHandler = new BlacklistHandler({
+    const emptyHandler = new BlackListHandler({
       caseInsensitiveWords: [],
       regExps: [],
     });

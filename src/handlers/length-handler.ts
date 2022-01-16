@@ -1,5 +1,6 @@
 import {Result} from '../result';
 import {HandlerSync} from '../types/sqnfa';
+import {utf8Length} from '../util';
 
 export class LengthConfiguration {
   /**
@@ -52,7 +53,7 @@ export class LengthHandler implements HandlerSync {
     }
 
     // TODO: Omit calling utf8Length if the password cannot be longer.
-    const size = this.utf8Length(password);
+    const size = utf8Length(password);
     if (size > this.config.maxByteSize) {
       return Result.fail({
         rule: 'maxByteSize',
@@ -63,30 +64,5 @@ export class LengthHandler implements HandlerSync {
     }
 
     return Result.ok(password);
-  }
-
-  /**
-   * Calculates the byte length of a string encoded as UTF8.
-   *
-   * See: https://github.com/dcodeIO/bcrypt.js/blob/7e2e93af99df2952253f9cf32db29aefa8f272f7/dist/bcrypt.js#L341
-   * @param string The string to measure.
-   * @returns The byte length of the string encoded as UTF8.
-   */
-  private utf8Length(string: string) {
-    let len = 0,
-      c = 0;
-    for (let i = 0; i < string.length; ++i) {
-      c = string.charCodeAt(i);
-      if (c < 128) len += 1;
-      else if (c < 2048) len += 2;
-      else if (
-        (c & 0xfc00) === 0xd800 &&
-        (string.charCodeAt(i + 1) & 0xfc00) === 0xdc00
-      ) {
-        ++i;
-        len += 4;
-      } else len += 3;
-    }
-    return len;
   }
 }

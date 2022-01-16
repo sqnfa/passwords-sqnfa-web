@@ -3,7 +3,8 @@ import {LengthHandler} from '../../src/handlers/length-handler';
 describe('a valid password', () => {
   const handler = new LengthHandler();
   it('should return the original password in the result.', () => {
-    const password = 'MyPassword';
+    // Registered trademark is 2 bytes, ethiopic syllable phwa is 3 bytes and rocket is 4 bytes in UTF8.
+    const password = 'UnicodeWelcome: ®ጷ🚀';
 
     const result = handler.handleSync(password);
 

@@ -2,7 +2,7 @@ import {PasswordsSqnfaWeb} from '../src/index';
 import {LengthHandler} from '../src/handlers/length-handler';
 import {
   BlacklistConfiguration,
-  BlacklistHandler,
+  BlackListHandler,
 } from '../src/handlers/blacklist-handler';
 import {HaveibeenpwnedHandler} from '../src/handlers/haveibeenpwned-handler';
 import {MockHttpClient} from './handlers/haveibeenpwned-handler.test';
@@ -12,7 +12,14 @@ import {BcryptHandler} from '../src/handlers/bcrypt-handler';
 describe('a successful handling with the chain of responsibility', () => {
   const handler = new PasswordsSqnfaWeb()
     .useSync(new LengthHandler())
-    .useSync(new LengthHandler({minLength: 0, maxByteSize: 5000}));
+    .useSync(new LengthHandler({minLength: 0, maxByteSize: 5000}))
+    .useBlackListHandler(
+      {caseInsensitiveWords: [], regExps: []},
+      false,
+      'john@example.com',
+      4,
+      4
+    );
   it('should return a successful result.', async () => {
     const result = await handler.handle('correct-horse-battery-staple');
 
@@ -35,7 +42,7 @@ describe('a failed handling with the chain of responsibility without stop on fai
 
 describe('a normal usage', () => {
   const lengthHandler = new LengthHandler();
-  const blacklistHandler = new BlacklistHandler(
+  const blacklistHandler = new BlackListHandler(
     new BlacklistConfiguration(
       ['sqnfa', 'password', 'web'],
       [new RegExp(/[5s$z§]qnf[a4@^]/i)]
@@ -54,7 +61,7 @@ describe('a normal usage', () => {
     .useSync(blacklistHandler, true)
     .use(haveibeenpwnedHandler, true)
     .useSync(sha512Handler)
-    .useSync(bcryptHandler);
+    .use(bcryptHandler);
 
   it('should accept a valid password and hash it.', async () => {
     const lengthHandlerSpy = jest.spyOn(lengthHandler, 'handleSync');
@@ -64,7 +71,7 @@ describe('a normal usage', () => {
       'handle'
     );
     const sha512HandlerSpy = jest.spyOn(sha512Handler, 'handleSync');
-    const bcryptHandlerSpy = jest.spyOn(bcryptHandler, 'handleSync');
+    const bcryptHandlerSpy = jest.spyOn(bcryptHandler, 'handle');
     const password = '@ecgS=C63fz>}f`b3_G3';
 
     const result = await handler.handle(password);
@@ -79,5 +86,21 @@ describe('a normal usage', () => {
 
     expect(result.isSuccess).toBeTruthy();
     expect(result.getPassword().startsWith(bcryptSalt)).toBeTruthy();
+  });
+
+  it('should work on an empty password', async () => {
+    const emptyHandler = new PasswordsSqnfaWeb()
+      .useLengthHandler()
+      .useBlackListHandler({caseInsensitiveWords: [], regExps: []})
+      .useHaveibeenpwnedHandler({
+        pwnedPasswordsUrl: '',
+        httpClient: new MockHttpClient(),
+      })
+      .useSha512Handler()
+      .useBcryptHandler({salt: '$2a$08$RNbCt.Je2GAP4ub8FyX5le'});
+
+    const result = await emptyHandler.handle('');
+
+    expect(result.isSuccess).toBeFalsy();
   });
 });
