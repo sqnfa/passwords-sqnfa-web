@@ -2,7 +2,7 @@
   "name": "passwords-sqnfa-web",
   "version": "0.1.0",
   "author": "Martin Storgaard Dieu <martin@storgaarddieu.com>",
-  "description": "Passwords are sine qua non for applications - also the for the web. This package aims to preprocess passwords in the browser before they are sent to the backend. It is not a substitute for proper handling of passwords in the backend. This is just an extra layer.",
+  "description": "This library implements the recommendations that apply to client-side password handling from NIST and OWASP. The purpose of this library is to provide an easy pluggable client-side password preprocessor.",
   "main": "build/src/index.js",
   "types": "build/src/index.d.ts",
   "files": [
