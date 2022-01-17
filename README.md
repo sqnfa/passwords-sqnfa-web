@@ -1,4 +1,4 @@
-# Passwords are sine qua non for web applications (passwords-sqnfa-web)
+
 > Implementation of best practice client-side password handling.
 
 Passwords are still essential for most applications. This also includes web applications. This library implements the recommendations that apply to client-side password handling from the National Institute of Standards and Technology (NIST) and the Open Web Application Security Project (OWASP). The purpose of this library is to provide an easy pluggable client-side password preprocessor. It is not a substitute for the proper handling of passwords in the backend and should only be considered an extra layer.
@@ -33,7 +33,10 @@ ToDo
 ToDo
 
 # Background
-ToDo
+The acronym sqnfa is short hand of "sine qua non for applications". 
+Sine qua non is Latin and literally translates to "without which, not".
+All projects within the sqnfa organization are meant to be reusable in all 
+types of modern applications.
 
 # License
 Apache 2.0
