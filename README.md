@@ -6,7 +6,7 @@ Passwords are still essential for most applications. This also includes web appl
 # Usage
 Include the minified build and access the main password handler directly.
 ```javascript
-const handler = new PasswordsSqnfaWeb.PasswordsSqnfaWeb()
+const passwordHandler = new PasswordsSqnfaWeb.PasswordsSqnfaWeb()
     .useLengthHandler()
     .useEmailBlackListHandler({email, slidingWindow, minTokenLength})
     .useBlackListHandler({caseInsensitiveWords, regExps}, true)
