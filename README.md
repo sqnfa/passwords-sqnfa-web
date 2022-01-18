@@ -24,7 +24,8 @@ if(result.isSuccess) {
 The order of chaining is important. In the above example, the length policy is handled first, then the e-mail black list policy.
 This is followed by the black list policy. The second parameter `true` in the `useBlackListHandler` method tells the PasswordsSqnfaWeb handler
 to stop the execution, if this or any of previous handlers contained one or more failed results. If and only if the first three handlers are successful,
-then the password will be validated towards the haveibeenpwned API. Finally the password is hashed by the bcrypt algorithm.
+then the password will be validated towards the haveibeenpwned API. Finally, if the password has not been part of previous breach corpses, then the 
+password is hashed by the bcrypt algorithm.
 
 See a complete example in vanilla javascript in `examples/vanilla.html`.
 
