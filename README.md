@@ -6,9 +6,10 @@ Passwords are still essential for most applications. This also includes web appl
 # Usage
 Include the minified build and access the main password handler directly.
 ```javascript
-const passwordHandler = new PasswordsSqnfaWeb.PasswordsSqnfaWeb()
-    .useLengthHandler(undefined, true)
-    .useBlackListHandler({caseInsensitiveWords, regExps}, true, email, 4, 4)
+const handler = new PasswordsSqnfaWeb.PasswordsSqnfaWeb()
+    .useLengthHandler()
+    .useEmailBlackListHandler({email: email, slidingWindow: 5, minTokenLength: 4})
+    .useBlackListHandler({caseInsensitiveWords, regExps}, true)
     .useHaveibeenpwnedHandler({pwnedPasswordsUrl, httpClient})
     .useBcryptHandler({salt})
 
@@ -35,8 +36,7 @@ ToDo
 # Background
 The acronym sqnfa is short hand of "sine qua non for applications". 
 Sine qua non is Latin and literally translates to "without which, not".
-All projects within the sqnfa organization are meant to be reusable in all 
-types of modern applications.
+All projects within the sqnfa organization are meant to be reusable and easy pluggable in all types of modern applications.
 
 # License
 Apache 2.0

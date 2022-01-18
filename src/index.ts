@@ -1,8 +1,12 @@
 import {BcryptConfiguration, BcryptHandler} from './handlers/bcrypt-handler';
 import {
-  BlacklistConfiguration,
+  BlackListConfiguration,
   BlackListHandler,
 } from './handlers/blacklist-handler';
+import {
+  EmailBlackListConfiguration,
+  EmailBlackListHandler,
+} from './handlers/email-blacklist-handler';
 import {
   HaveibeenpwnedConfiguration,
   HaveibeenpwnedHandler,
@@ -13,8 +17,8 @@ import {Failure, Result} from './result';
 import {Handler, HandlerSync} from './types/sqnfa';
 
 /**
- * 
- * 
+ *
+ *
  * @license passwords-sqnfa-web Copyright 2022 Martin Storgaard Dieu <martin@storgaarddieu.com>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,27 +122,27 @@ export class PasswordsSqnfaWeb implements Handler {
    *
    * @param config @see BlacklistConfiguration for details.
    * @param stopOnFailure If true, the execution will stop, if any failures has happened to this point.
-   * @param email If provided, the information contained within the e-mail will be added.
-   * @param emailSlidingWindow The size of the sliding window used when tokenizing the email.
-   * @param emailMinTokenLength A safe-gaurd to ensure that shorter tokens are not added.
    * @returns The current instance of PasswordsSqnfaWeb which allows chaining of the use* methods.
    */
   public useBlackListHandler(
-    config: BlacklistConfiguration,
-    stopOnFailure = false,
-    email?: string,
-    emailSlidingWindow?: number,
-    emailMinTokenLength?: number
+    config: BlackListConfiguration,
+    stopOnFailure = false
   ): PasswordsSqnfaWeb {
-    const handler = new BlackListHandler(config);
-    if (email) {
-      handler.addEmailInformation(
-        email,
-        emailSlidingWindow,
-        emailMinTokenLength
-      );
-    }
-    return this.useSync(handler, stopOnFailure);
+    return this.useSync(new BlackListHandler(config), stopOnFailure);
+  }
+
+  /**
+   * @see EmailBlackListHandler for details.
+   *
+   * @param config @see EmailBlackListConfiguration for details
+   * @param stopOnFailure If true, the execution will stop, if any failures has happened to this point.
+   * @returns The current instance of PasswordsSqnfaWeb which allows chaining of the use* methods.
+   */
+  public useEmailBlackListHandler(
+    config: EmailBlackListConfiguration,
+    stopOnFailure = false
+  ): PasswordsSqnfaWeb {
+    return this.useSync(new EmailBlackListHandler(config), stopOnFailure);
   }
 
   /**

@@ -1,25 +1,23 @@
 import {PasswordsSqnfaWeb} from '../src/index';
 import {LengthHandler} from '../src/handlers/length-handler';
 import {
-  BlacklistConfiguration,
+  BlackListConfiguration,
   BlackListHandler,
 } from '../src/handlers/blacklist-handler';
 import {HaveibeenpwnedHandler} from '../src/handlers/haveibeenpwned-handler';
 import {MockHttpClient} from './handlers/haveibeenpwned-handler.test';
 import {Sha512Handler} from '../src/handlers/sha512-handler';
 import {BcryptHandler} from '../src/handlers/bcrypt-handler';
+import {
+  EmailBlackListConfiguration,
+  EmailBlackListHandler,
+} from '../src/handlers/email-blacklist-handler';
 
 describe('a successful handling with the chain of responsibility', () => {
   const handler = new PasswordsSqnfaWeb()
     .useSync(new LengthHandler())
     .useSync(new LengthHandler({minLength: 0, maxByteSize: 5000}))
-    .useBlackListHandler(
-      {caseInsensitiveWords: [], regExps: []},
-      false,
-      'john@example.com',
-      4,
-      4
-    );
+    .useBlackListHandler(new BlackListConfiguration([], []));
   it('should return a successful result.', async () => {
     const result = await handler.handle('correct-horse-battery-staple');
 
@@ -43,12 +41,14 @@ describe('a failed handling with the chain of responsibility without stop on fai
 describe('a normal usage', () => {
   const lengthHandler = new LengthHandler();
   const blacklistHandler = new BlackListHandler(
-    new BlacklistConfiguration(
+    new BlackListConfiguration(
       ['sqnfa', 'password', 'web'],
       [new RegExp(/[5s$z§]qnf[a4@^]/i)]
     )
   );
-  blacklistHandler.addEmailInformation('john.doe@company.example.com');
+  const emailBlackListHandler = new EmailBlackListHandler(
+    new EmailBlackListConfiguration('john-doe@example.com', 0, 0)
+  );
   const haveibeenpwnedHandler = new HaveibeenpwnedHandler({
     httpClient: new MockHttpClient(),
     pwnedPasswordsUrl: '',
@@ -59,13 +59,18 @@ describe('a normal usage', () => {
   const handler = new PasswordsSqnfaWeb()
     .useSync(lengthHandler)
     .useSync(blacklistHandler, true)
+    .useSync(emailBlackListHandler)
     .use(haveibeenpwnedHandler, true)
     .useSync(sha512Handler)
     .use(bcryptHandler);
 
-  it('should accept a valid password and hash it.', async () => {
+  it('should use all handlers and hash the password.', async () => {
     const lengthHandlerSpy = jest.spyOn(lengthHandler, 'handleSync');
     const blacklistHandlerSpy = jest.spyOn(blacklistHandler, 'handleSync');
+    const emailBlackListHandlerSpy = jest.spyOn(
+      emailBlackListHandler,
+      'handleSync'
+    );
     const haveibeenpwnedHandlerSpy = jest.spyOn(
       haveibeenpwnedHandler,
       'handle'
@@ -78,6 +83,7 @@ describe('a normal usage', () => {
 
     expect(lengthHandlerSpy).toBeCalledWith(password);
     expect(blacklistHandlerSpy).toBeCalledWith(password);
+    expect(emailBlackListHandlerSpy).toBeCalledWith(password);
     expect(haveibeenpwnedHandlerSpy).toBeCalledWith(password);
     expect(sha512HandlerSpy).toBeCalledWith(password);
     expect(bcryptHandlerSpy).toBeCalledWith(
@@ -92,6 +98,11 @@ describe('a normal usage', () => {
     const emptyHandler = new PasswordsSqnfaWeb()
       .useLengthHandler()
       .useBlackListHandler({caseInsensitiveWords: [], regExps: []})
+      .useEmailBlackListHandler({
+        email: 'john@example.com',
+        slidingWindow: 0,
+        minTokenLength: 0,
+      })
       .useHaveibeenpwnedHandler({
         pwnedPasswordsUrl: '',
         httpClient: new MockHttpClient(),

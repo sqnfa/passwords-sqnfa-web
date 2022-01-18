@@ -67,7 +67,7 @@
     </form>
     <div class="d-flex flex-column">
       <div class="p-1" id="LengthHandler-minLength">Password must be longer than 8 characters.</div>
-      <div class="p-1" id="BlackListHandler-emailTokens">Password cannot contain parts of your e-mail.</div>
+      <div class="p-1" id="EmailBlackListHandler-emailTokens">Password cannot contain parts of your e-mail.</div>
       <div class="p-1" id="BlackListHandler-caseInsensitiveWords">Password cannot contain commom passwords.</div>
       <div class="p-1" id="BlackListHandler-regExps">Password cannot contain four consecutive identical characters.</div>
       <div class="p-1" id="HaveibeenpwnedHandler-pwned">Password cannot be part of previous breaches.</div>
@@ -124,7 +124,7 @@
           'LengthHandler-minLength': 'text-muted',
           'LengthHandler-maxByteSize': 'text-muted',
           'BlackListHandler-caseInsensitiveWords': 'text-muted',
-          'BlackListHandler-emailTokens': 'text-muted',
+          'EmailBlackListHandler-emailTokens': 'text-muted',
           'BlackListHandler-regExps': 'text-muted',
           'HaveibeenpwnedHandler-pwned': 'text-muted',
         }
@@ -135,8 +135,9 @@
         // Build the password handler
         const email = document.getElementById('email').value
         const handler = new PasswordsSqnfaWeb.PasswordsSqnfaWeb()
-            .useLengthHandler(undefined, true)
-            .useBlackListHandler({caseInsensitiveWords, regExps}, true, email, 4, 4)
+            .useLengthHandler()
+            .useEmailBlackListHandler({email, slidingWindow: 5, minTokenLength: 4})
+            .useBlackListHandler({caseInsensitiveWords, regExps}, true)
             .useHaveibeenpwnedHandler({pwnedPasswordsUrl, httpClient})
             .useBcryptHandler({salt});
         

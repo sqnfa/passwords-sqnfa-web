@@ -1,9 +1,9 @@
 import {
   BlackListHandler,
-  BlacklistConfiguration,
+  BlackListConfiguration,
 } from '../../src/handlers/blacklist-handler';
 // https://xkcd.com/936/
-const config = new BlacklistConfiguration(
+const config = new BlackListConfiguration(
   ['troubaD'],
   [new RegExp(/tr[o0]ub[a4]dor[u&][r3]/i)]
 );
@@ -60,98 +60,23 @@ describe('an invalid password', () => {
     expect(failures[0].expected).toBe(0);
     expect(failures[0].actual).toBe(1);
   });
-});
 
-describe('when adding an e-mail to the blacklist', () => {
-  it('should add all tokens to the blacklist.', () => {
-    const emptyHandler = new BlackListHandler({
-      caseInsensitiveWords: [],
-      regExps: [],
+  it('should include both failures if both rules are broken.', () => {
+    const result = handler.handleSync('troubador&3');
+    const failures = result.getFailures();
+
+    expect(failures).toHaveLength(2);
+    expect(failures).toContainEqual({
+      handler: handler.name,
+      rule: 'regExps',
+      expected: 0,
+      actual: 1,
     });
-
-    emptyHandler.addEmailInformation(
-      'john-doe@company.example.com',
-      undefined,
-      3
-    );
-    ['john', 'doe', 'company', 'example'].forEach(password => {
-      const result = emptyHandler.handleSync(password);
-
-      const failures = result.getFailures();
-      expect(failures).toHaveLength(1);
-      expect(failures[0].rule).toBe('emailTokens');
-      expect(failures[0].expected).toBe(0);
-      expect(failures[0].actual).toBe(1);
-    });
-  });
-
-  it('should allow the tld to be used.', () => {
-    const emptyHandler = new BlackListHandler({
-      caseInsensitiveWords: [],
-      regExps: [],
-    });
-    emptyHandler.addEmailInformation('john-doe@company.example.com');
-
-    const result = emptyHandler.handleSync('com');
-
-    expect(result.isSuccess).toBeTruthy();
-  });
-
-  it('should block partial words based on a sliding window.', () => {
-    const emptyHandler = new BlackListHandler({
-      caseInsensitiveWords: [],
-      regExps: [],
-    });
-    emptyHandler.addEmailInformation('john-doe@company.example.com', 5);
-
-    [
-      'john',
-      'company',
-      'example',
-      'compa',
-      'ompan',
-      'mpany',
-      'examp',
-      'xampl',
-      'ample',
-      'johnd',
-      'ohndo',
-      'hndoe',
-      'panye',
-      'anyex',
-      'nyexa',
-      'yexam',
-      'john-',
-      'ohn-d',
-      'hn-do',
-      'n-doe',
-      'pany.',
-      'any.e',
-      'ny.ex',
-      'y.exa',
-      '.exam',
-    ].forEach(password => {
-      const result = emptyHandler.handleSync(password);
-
-      const failures = result.getFailures();
-      expect(failures).toHaveLength(1);
-      expect(failures[0].rule).toBe('emailTokens');
-      expect(failures[0].expected).toBe(0);
-      expect(failures[0].actual).toBe(1);
-    });
-  });
-
-  it('should allow short words in the e-mail.', () => {
-    const emptyHandler = new BlackListHandler({
-      caseInsensitiveWords: [],
-      regExps: [],
-    });
-    emptyHandler.addEmailInformation('john-doe@eu.example.com');
-
-    ['eu', 'doe'].forEach(password => {
-      const result = emptyHandler.handleSync(password);
-
-      expect(result.isSuccess).toBeTruthy();
+    expect(failures).toContainEqual({
+      handler: handler.name,
+      rule: 'caseInsensitiveWords',
+      expected: 0,
+      actual: 1,
     });
   });
 });
