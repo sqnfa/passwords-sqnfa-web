@@ -1,4 +1,4 @@
-
+# Passwords are sqnfa for web
 > Implementation of best practice client-side password handling.
 
 Passwords are still essential for most applications. This also includes web applications. This library implements the recommendations that apply to client-side password handling from the National Institute of Standards and Technology (NIST) and the Open Web Application Security Project (OWASP). The purpose of this library is to provide an easy pluggable client-side password preprocessor. It is not a substitute for the proper handling of passwords in the backend and should only be considered an extra layer.
