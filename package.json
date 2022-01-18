@@ -32,14 +32,13 @@
   ],
   "scripts": {
     "test": "jest --maxWorkers=1 --verbose=true",
-    "test:coverage": "jest --maxWorkers=1 --coverage",
+    "test:coverage": "jest --maxWorkers=1 --silent --ci --coverage --coverageReporters='text' --coverageReporters='text-summary'",
     "lint": "gts lint",
     "clean": "gts clean",
     "compile": "webpack",
     "fix": "gts fix",
     "prepare": "npm run compile",
-    "pretest": "npm run fix && npm run compile",
-    "posttest": "npm run clean"
+    "pretest": "npm run fix"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
