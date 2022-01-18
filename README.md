@@ -18,7 +18,7 @@ const result = passwordHandler.handle(password)
 if(result.isSuccess) {
     console.log("Preprocessed password is: ", result.getPassword())
 } else {
-    console.log("One or more rules broken: ", result.getFailures())
+    console.log("One or more policies are broken: ", result.getFailures())
 }
 ```
 The order of chaining is important. In the above example, the length policy is handled first, then the e-mail black list policy.
