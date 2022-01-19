@@ -195,7 +195,7 @@ A key-value property that contains the name of handlers that has been run as key
 
 ## Futher examples
 
-An web page using the Angular framework is under development. The goal of this web page is to collect statistics for the various handlers.
+A web page using the Angular framework is under development. The goal of this web page is to collect statistics for the various handlers.
 
 ## Background
 
