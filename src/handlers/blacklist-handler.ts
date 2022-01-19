@@ -30,9 +30,7 @@ export class BlackListHandler implements HandlerSync {
    * the name of the service itself) that users are likely to choose.
    *
    * This handler black lists passwords containing parts of black listed words
-   * or passwords that matches defined regular expressions. One or more e-mail
-   * addresses can be added. The e-mail is tokenized and each token is added
-   * to the black list.
+   * or passwords that matches defined regular expressions.
    */
   constructor(private readonly config: BlackListConfiguration) {}
 
