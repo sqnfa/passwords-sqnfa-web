@@ -5,7 +5,14 @@ import {utf8Length} from '../util';
 import * as jshashes from 'jshashes';
 
 export class BcryptConfiguration {
-  constructor(readonly salt: string) {}
+  constructor(
+    /**
+     * A user specific salt on the format `$2a$[cost]$[22 character salt]`.
+     * This should come from the backend based on the user's identifier (or similar).
+     * OWASP recommended cost is 10. If cost is less than 10, then it should be prefixed with 0, e.g. 08.
+     */
+    readonly salt: string
+  ) {}
 }
 
 export class BcryptHandler implements Handler {
@@ -23,8 +30,8 @@ export class BcryptHandler implements Handler {
    *
    * Note: Bcrypt limits the password length to be 72 encoded in utf-8.
    * Should the users password be longer than this, then the password
-   * will be hashed with SHA512/432 and encoded in base64 before being
-   * hashed by bcrypt.
+   * will automatically be hashed with SHA512/432 and encoded in base64
+   * before being hashed by bcrypt.
    */
   constructor(private readonly config: BcryptConfiguration) {}
 

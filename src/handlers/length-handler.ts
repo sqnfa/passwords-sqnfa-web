@@ -10,7 +10,7 @@ export class LengthConfiguration {
   /**
    * The maximum number of bytes the password is represented in UTF8 code units.
    */
-  public maxByteSize = 72;
+  public maxByteSize = 2097152;
 }
 
 export class LengthHandler implements HandlerSync {

@@ -17,7 +17,12 @@ import {Failure, Result} from './result';
 import {Handler, HandlerSync} from './types/sqnfa';
 
 /**
- *
+ * Passwords are still essential for most applications. This also includes web applications.
+ * This library implements the recommendations that apply to client-side password handling 
+ * from the National Institute of Standards and Technology (NIST) and the Open Web Application 
+ * Security Project (OWASP). The purpose of this library is to provide an easy pluggable 
+ * client-side password preprocessor. It is not a substitute for the proper handling of passwords 
+ * in the backend and should only be considered an extra layer.
  *
  * @license passwords-sqnfa-web Copyright 2022 Martin Storgaard Dieu <martin@storgaarddieu.com>
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,9 +37,15 @@ import {Handler, HandlerSync} from './types/sqnfa';
  */
 export class PasswordsSqnfaWeb implements Handler {
   public readonly name = 'PasswordsSqnfaWeb';
+  /**
+   * A key-value property that contains the name of handlers that has been 
+   * run as key and their total running time statistics in milliseconds as 
+   * value.
+   */
+  public statistics: {[key: string]: number} = {};
+
   private handlers: [Handler | HandlerSync, boolean][] = [];
   private failures: Failure[] = [];
-  private statistics: {[key: string]: number} = {};
 
   async handle(password: string): Promise<Result> {
     this.failures = [];
@@ -77,7 +88,7 @@ export class PasswordsSqnfaWeb implements Handler {
    * Please bear in mind that high password complexity requriements does not always yield
    * highly secure passwords chosen by the user.
    *
-   * @param handler A syncronous implementaion of a handler.
+   * @param handler A syncronous implementaion of the handler interface.
    * @param stopOnFailure If true, the execution will stop, if any failures has happened to this point.
    * @returns The current instance of PasswordsSqnfaWeb which allows chaining of the use* methods.
    */
@@ -94,7 +105,7 @@ export class PasswordsSqnfaWeb implements Handler {
    * Please bear in mind that high password complexity requriements does not always yield
    * highly secure passwords chosen by the user.
    *
-   * @param handler An asyncronous implementaion of a handler.
+   * @param handler An asyncronous implementaion of the handler interface.
    * @param stopOnFailure If true, the execution will stop, if any failures has happened to this point.
    * @returns The current instance of PasswordsSqnfaWeb which allows chaining of the use* methods.
    */

@@ -3,8 +3,16 @@ import {Handler, HaveibeenpwnedHttpClient} from '../types/sqnfa';
 import * as jshashes from 'jshashes';
 
 export class HaveibeenpwnedConfiguration {
+  /**
+   * The enpoint to he pwned passwords range search that ensures k-anonymity while looking for breaches.
+   */
   public pwnedPasswordsUrl = 'https://api.pwnedpasswords.com/range/';
-  constructor(readonly httpClient: HaveibeenpwnedHttpClient) {}
+  constructor(
+    /**
+     * Bring your own http client that does the actual call to the API.
+     */
+    readonly httpClient: HaveibeenpwnedHttpClient
+  ) {}
 }
 
 export class HaveibeenpwnedHandler implements Handler {

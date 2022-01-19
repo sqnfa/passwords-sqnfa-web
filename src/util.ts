@@ -1,7 +1,10 @@
 /**
  * Calculates the byte length of a string encoded as UTF8.
+ * 
+ * This is a direct copy of the implemation from bcryptjs.
+ * The only thing changes is the appliance of gts linting.
  *
- * See: https://github.com/dcodeIO/bcrypt.js/blob/7e2e93af99df2952253f9cf32db29aefa8f272f7/dist/bcrypt.js#L341
+ * @see https://github.com/dcodeIO/bcrypt.js/blob/7e2e93af99df2952253f9cf32db29aefa8f272f7/dist/bcrypt.js#L341
  * @param string The string to measure.
  * @returns The byte length of the string encoded as UTF8.
  */
