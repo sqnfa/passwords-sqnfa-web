@@ -86,7 +86,7 @@ The current instance of `PasswordsSqnfaWeb` which allows chaining of the use* me
 
 NIST 800-63B: Password complexity: Users’ password choices are very predictable, so attackers are likely to guess passwords that have been successful in the past. For this reason, it is recommended that passwords chosen by users be compared against a “black list” of unacceptable passwords. This list should include dictionary words, and specific words (such as the name of the service itself) that users are likely to choose.
 
-This handler black lists passwords containing parts of black listed words or passwords that matches defined regular expressions. One or more e-mail addresses can be added. The e-mail is tokenized and each token is added to the black list.
+This handler black lists passwords containing parts of black listed words or passwords that matches defined regular expressions.
 
 **PARAMETERS**
 
