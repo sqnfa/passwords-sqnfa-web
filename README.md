@@ -12,7 +12,8 @@ Include the minified build and access the main password handler directly.
 const passwordHandler = new PasswordsSqnfaWeb.PasswordsSqnfaWeb()
     .useLengthHandler()
     .useEmailBlackListHandler({email, slidingWindow, minTokenLength})
-    .useBlackListHandler({caseInsensitiveWords, regExps}, true)
+    .useBlackListHandler({caseInsensitiveWords}, true)
+    .useRegexHandler({regExps}, true)
     .useHaveibeenpwnedHandler({pwnedPasswordsUrl, httpClient}, true)
     .useBcryptHandler({salt})
 
@@ -86,7 +87,7 @@ The current instance of `PasswordsSqnfaWeb` which allows chaining of the use* me
 
 NIST 800-63B: Password complexity: Users’ password choices are very predictable, so attackers are likely to guess passwords that have been successful in the past. For this reason, it is recommended that passwords chosen by users be compared against a “black list” of unacceptable passwords. This list should include dictionary words, and specific words (such as the name of the service itself) that users are likely to choose.
 
-This handler black lists passwords containing parts of black listed words or passwords that matches defined regular expressions.
+This handler black lists passwords containing parts of black listed words.
 
 **PARAMETERS**
 
@@ -100,6 +101,24 @@ The current instance of `PasswordsSqnfaWeb` which allows chaining of the use* me
 **BlackListConfiguration**
 
 - `caseInsensitiveWords`: string[] - A list of black listed words. Both the password and every words are compared with toLocaleUpperCase.
+
+### useRegexHandler(config: RegexConfiguration, stopOnFailure = false)
+
+NIST 800-63B: Password complexity: Users’ password choices are very predictable, so attackers are likely to guess passwords that have been successful in the past. For this reason, it is recommended that passwords chosen by users be compared against a “black list” of unacceptable passwords. This list should include dictionary words, and specific words (such as the name of the service itself) that users are likely to choose.
+
+This handler black lists passwords that matches defined regular expressions, such as specific words related to the service itself.
+
+**PARAMETERS**
+
+- `config`: RegexConfiguration - See below
+- `stopOnFailure`: boolean - If true, the execution will stop, if any failures has happened to this point.
+
+**RETURNS**
+
+The current instance of `PasswordsSqnfaWeb` which allows chaining of the use* methods.
+
+**RegexConfiguration**
+
 - `regExps`: RegExp[] - A list of black listed regular expressions. Each expression is compared with the original password.
 
 ### useHaveibeenpwnedHandler(config: HaveibeenpwnedConfiguration, stopOnFailure = false)
