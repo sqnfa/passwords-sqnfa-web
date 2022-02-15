@@ -1,4 +1,4 @@
-# Passwords are sqnfa and web
+# ●●● Passwords are sqnfa and web
 
 > Implementation of best practice client-side password handling.
 
