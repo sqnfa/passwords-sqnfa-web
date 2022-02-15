@@ -18,19 +18,19 @@ import {Handler, HandlerSync} from './types/sqnfa';
 
 /**
  * Passwords are still essential for most applications. This also includes web applications.
- * This library implements the recommendations that apply to client-side password handling 
- * from the National Institute of Standards and Technology (NIST) and the Open Web Application 
- * Security Project (OWASP). The purpose of this library is to provide an easy pluggable 
- * client-side password preprocessor. It is not a substitute for the proper handling of passwords 
+ * This library implements the recommendations that apply to client-side password handling
+ * from the National Institute of Standards and Technology (NIST) and the Open Web Application
+ * Security Project (OWASP). The purpose of this library is to provide an easy pluggable
+ * client-side password preprocessor. It is not a substitute for the proper handling of passwords
  * in the backend and should only be considered an extra layer.
  *
  * @license passwords-sqnfa-web Copyright 2022 Martin Storgaard Dieu <martin@storgaarddieu.com>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     https://github.com/sqnfa/passwords-sqnfa-web/blob/main/LICENSE
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -40,8 +40,8 @@ import {Handler, HandlerSync} from './types/sqnfa';
 export class PasswordsSqnfaWeb implements Handler {
   public readonly name = 'PasswordsSqnfaWeb';
   /**
-   * A key-value property that contains the name of handlers that has been 
-   * run as key and their total running time statistics in milliseconds as 
+   * A key-value property that contains the name of handlers that has been
+   * run as key and their total running time statistics in milliseconds as
    * value.
    */
   public statistics: {[key: string]: number} = {};

@@ -1,6 +1,6 @@
 /**
  * Calculates the byte length of a string encoded as UTF8.
- * 
+ *
  * This is a direct copy of the implemation from bcryptjs.
  * The only thing changes is the appliance of gts linting.
  *
