@@ -69,7 +69,7 @@
       <div class="p-1" id="LengthHandler-minLength">Password must be longer than 8 characters.</div>
       <div class="p-1" id="EmailBlackListHandler-emailTokens">Password cannot contain parts of your e-mail.</div>
       <div class="p-1" id="BlackListHandler-caseInsensitiveWords">Password cannot contain commom passwords.</div>
-      <div class="p-1" id="BlackListHandler-regExps">Password cannot contain four consecutive identical characters.</div>
+      <div class="p-1" id="RegexHandler-regExps">Password cannot contain four consecutive identical characters.</div>
       <div class="p-1" id="HaveibeenpwnedHandler-pwned">Password cannot be part of previous breaches.</div>
       <div class="p-1" id="LengthHandler-maxByteSize">Password must be smaller than 2 MiB.</div>
     </div>
@@ -130,7 +130,7 @@
           'LengthHandler-maxByteSize': 'text-muted',
           'BlackListHandler-caseInsensitiveWords': 'text-muted',
           'EmailBlackListHandler-emailTokens': 'text-muted',
-          'BlackListHandler-regExps': 'text-muted',
+          'RegexHandler-regExps': 'text-muted',
           'HaveibeenpwnedHandler-pwned': 'text-muted',
         }
         for (const key of Object.keys(requirementColors)) {
@@ -142,7 +142,8 @@
         const handler = new PasswordsSqnfaWeb.PasswordsSqnfaWeb()
             .useLengthHandler()
             .useEmailBlackListHandler({email, slidingWindow, minTokenLength})
-            .useBlackListHandler({caseInsensitiveWords, regExps}, true)
+            .useBlackListHandler({caseInsensitiveWords}, true)
+            .useRegexHandler({regExps}, true)
             .useHaveibeenpwnedHandler({pwnedPasswordsUrl, httpClient})
             .useBcryptHandler({salt});
         
