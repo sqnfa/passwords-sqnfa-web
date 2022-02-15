@@ -1,20 +1,20 @@
 import {Result} from '../result';
 import {HandlerSync} from '../types/sqnfa';
 
-export class BlackListConfiguration {
+export class RegexConfiguration {
   /**
    *
    */
   constructor(
     /**
-     * A list of black listed words. Both the password and every words are compared with toLocaleUpperCase.
+     * A list of black listed regular expressions. Each expression is compared with the original password.
      */
-    readonly caseInsensitiveWords: string[]
+    readonly regExps: RegExp[]
   ) {}
 }
 
-export class BlackListHandler implements HandlerSync {
-  public readonly name: string = 'BlackListHandler';
+export class RegexHandler implements HandlerSync {
+  public readonly name: string = 'RegexHandler';
 
   /**
    * NIST 800-63B:
@@ -25,19 +25,19 @@ export class BlackListHandler implements HandlerSync {
    * This list should include dictionary words, and specific words (such as
    * the name of the service itself) that users are likely to choose.
    *
-   * This handler black lists passwords containing parts of black listed words.
+   * This handler black lists passwords that matches defined regular
+   * expressions, such as specific words related to the service itself.
    */
-  constructor(private readonly config: BlackListConfiguration) {}
+  constructor(private readonly config: RegexConfiguration) {}
 
   public handleSync(password: string): Result {
-    const upperCasePassword = password.toLocaleUpperCase();
-    const containsCaseInsensitveWord = this.config.caseInsensitiveWords.some(
-      word => upperCasePassword.indexOf(word.toLocaleUpperCase()) >= 0
+    const matchesRegExp = this.config.regExps.some(regExp =>
+      regExp.test(password)
     );
-    if (containsCaseInsensitveWord) {
+    if (matchesRegExp) {
       return Result.fail({
         handler: this.name,
-        rule: 'caseInsensitiveWords',
+        rule: 'regExps',
         expected: 0,
         actual: 1,
       });

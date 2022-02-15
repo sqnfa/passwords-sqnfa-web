@@ -12,6 +12,7 @@ import {
   HaveibeenpwnedHandler,
 } from './handlers/haveibeenpwned-handler';
 import {LengthConfiguration, LengthHandler} from './handlers/length-handler';
+import {RegexConfiguration, RegexHandler} from './handlers/regex-handler';
 import {Sha512Handler} from './handlers/sha512-handler';
 import {Failure, Result} from './result';
 import {Handler, HandlerSync} from './types/sqnfa';
@@ -142,6 +143,20 @@ export class PasswordsSqnfaWeb implements Handler {
     stopOnFailure = false
   ): PasswordsSqnfaWeb {
     return this.useSync(new BlackListHandler(config), stopOnFailure);
+  }
+
+  /**
+   * @see RegexHandler for details.
+   *
+   * @param config @see RegexConfiguration for details.
+   * @param stopOnFailure If true, the execution will stop, if any failures has happened to this point.
+   * @returns The current instance of PasswordsSqnfaWeb which allows chaining of the use* methods.
+   */
+  public useRegexHandler(
+    config: RegexConfiguration,
+    stopOnFailure = false
+  ): PasswordsSqnfaWeb {
+    return this.useSync(new RegexHandler(config), stopOnFailure);
   }
 
   /**
