@@ -22,7 +22,9 @@ module.exports = {
   output: {
     filename: 'passwords-sqnfa-web.min.js',
     path: path.resolve(__dirname, 'build'),
-    libraryTarget: 'var',
+    libraryTarget: 'umd',
     library: 'PasswordsSqnfaWeb',
+    globalObject: 'this',
+    umdNamedDefine: true
   },
 };

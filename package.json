@@ -1,12 +1,12 @@
 {
   "name": "passwords-sqnfa-web",
-  "version": "0.1.0",
+  "version": "0.6.0",
   "author": "Martin Storgaard Dieu <info@sqnfa.com>",
   "description": "This library implements the recommendations that apply to client-side password handling from NIST and OWASP. The purpose of this library is to provide an easy pluggable client-side password preprocessor.",
-  "main": "build/src/index.js",
+  "main": "build/passwords-sqnfa-web.min.js",
   "types": "build/src/index.d.ts",
   "files": [
-    "build/src"
+    "build"
   ],
   "license": "Apache-2.0",
   "repository": {
