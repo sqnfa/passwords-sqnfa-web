@@ -3,7 +3,7 @@ import {
   BlackListConfiguration,
 } from '../../src/handlers/blacklist-handler';
 // https://xkcd.com/936/
-const config = new BlackListConfiguration(['troubaD']);
+const config = new BlackListConfiguration(['troubaD'], 0.75);
 const handler = new BlackListHandler(config);
 
 describe('a valid password', () => {
@@ -17,6 +17,7 @@ describe('a valid password', () => {
   it('should be valid when no case insensitive words are provided.', () => {
     const emptyHandler = new BlackListHandler({
       caseInsensitiveWords: [],
+      ratioThreshold: 1,
     });
 
     const result = emptyHandler.handleSync(password);
@@ -24,11 +25,18 @@ describe('a valid password', () => {
     expect(result.isSuccess).toBeTruthy();
     expect(result.getPassword()).toBe(password);
   });
+
+  it('should work when containing the word, but is long enough.', () => {
+    // Contains the word, but 7/10 = 0.70, which is smaller than threshold of 0.75
+    const result = handler.handleSync('troubaDour');
+    expect(result.isSuccess).toBeTruthy();
+  });
 });
 
 describe('an invalid password', () => {
   it('should reject banned words.', () => {
-    const result = handler.handleSync("I'm a TrouBad m4ker");
+    // Contains troubad and ratio is 7/9 = 0.78
+    const result = handler.handleSync('1troubadr');
     const failures = result.getFailures();
 
     expect(failures).toHaveLength(1);
@@ -38,7 +46,7 @@ describe('an invalid password', () => {
   });
 
   it('should reject banned words when the password starts with it.', () => {
-    const result = handler.handleSync('trouBADour');
+    const result = handler.handleSync('trouBADor');
     const failures = result.getFailures();
 
     expect(failures).toHaveLength(1);

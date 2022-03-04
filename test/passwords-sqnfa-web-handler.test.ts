@@ -17,7 +17,7 @@ describe('a successful handling with the chain of responsibility', () => {
   const handler = new PasswordsSqnfaWeb()
     .useSync(new LengthHandler())
     .useSync(new LengthHandler({minLength: 0, maxByteSize: 5000}))
-    .useBlackListHandler(new BlackListConfiguration([]));
+    .useBlackListHandler(new BlackListConfiguration([], 0.75));
   it('should return a successful result.', async () => {
     const result = await handler.handle('correct-horse-battery-staple');
 
@@ -41,7 +41,7 @@ describe('a failed handling with the chain of responsibility without stop on fai
 describe('a normal usage', () => {
   const lengthHandler = new LengthHandler();
   const blacklistHandler = new BlackListHandler(
-    new BlackListConfiguration(['sqnfa', 'password', 'web'])
+    new BlackListConfiguration(['sqnfa', 'password', 'web'], 0.75)
   );
   const emailBlackListHandler = new EmailBlackListHandler(
     new EmailBlackListConfiguration('john-doe@example.com', 0, 0)
@@ -94,7 +94,7 @@ describe('a normal usage', () => {
   it('should work on an empty password', async () => {
     const emptyHandler = new PasswordsSqnfaWeb()
       .useLengthHandler()
-      .useBlackListHandler({caseInsensitiveWords: []})
+      .useBlackListHandler({caseInsensitiveWords: [], ratioThreshold: 0.75})
       .useRegexHandler({regExps: []})
       .useEmailBlackListHandler({
         email: 'john@example.com',

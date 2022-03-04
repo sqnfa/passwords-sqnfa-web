@@ -101,6 +101,7 @@ The current instance of `PasswordsSqnfaWeb` which allows chaining of the use* me
 **BlackListConfiguration**
 
 - `caseInsensitiveWords`: string[] - A list of black listed words. Both the password and every words are compared with toLocaleUpperCase.
+- `ratioThreshold`: number - The ratio between the length of the password over the length of the black listed word. 0.75 would imply that 6 out of 8 consecutive characters cannot be on the black list.
 
 ### useRegexHandler(config: RegexConfiguration, stopOnFailure = false)
 

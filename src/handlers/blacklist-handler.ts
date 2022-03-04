@@ -9,7 +9,13 @@ export class BlackListConfiguration {
     /**
      * A list of black listed words. Both the password and every words are compared with toLocaleUpperCase.
      */
-    readonly caseInsensitiveWords: string[]
+    readonly caseInsensitiveWords: string[],
+
+    /**
+     * The ratio between the length of the password over the length of the black listed word.
+     * 0.75 would imply that 6 out of 8 consecutive characters cannot be on the black list.
+     */
+    readonly ratioThreshold: number
   ) {}
 }
 
@@ -31,8 +37,11 @@ export class BlackListHandler implements HandlerSync {
 
   public handleSync(password: string): Result {
     const upperCasePassword = password.toLocaleUpperCase();
+    const passwordLength = upperCasePassword.length;
     const containsCaseInsensitveWord = this.config.caseInsensitiveWords.some(
-      word => upperCasePassword.indexOf(word.toLocaleUpperCase()) >= 0
+      word =>
+        upperCasePassword.indexOf(word.toLocaleUpperCase()) >= 0 &&
+        word.length / passwordLength >= this.config.ratioThreshold
     );
     if (containsCaseInsensitveWord) {
       return Result.fail({
