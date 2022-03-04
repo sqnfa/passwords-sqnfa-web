@@ -12,7 +12,7 @@ Include the minified build and access the main password handler directly.
 const passwordHandler = new PasswordsSqnfaWeb.PasswordsSqnfaWeb()
     .useLengthHandler()
     .useEmailBlackListHandler({email, slidingWindow, minTokenLength})
-    .useBlackListHandler({caseInsensitiveWords}, true)
+    .useBlackListHandler({caseInsensitiveWords, 0.75}, true)
     .useRegexHandler({regExps}, true)
     .useHaveibeenpwnedHandler({pwnedPasswordsUrl, httpClient}, true)
     .useBcryptHandler({salt})
