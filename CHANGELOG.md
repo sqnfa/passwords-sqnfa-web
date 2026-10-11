@@ -1,5 +1,10 @@
 # Release notes
 
+## 1.0.2
+
+- Fixed npm publication with npm 12's package-keyed `npm pack --json` output while retaining support for earlier CLI versions.
+- Pinned the publishing CLI to npm 12.2.0.
+
 ## 1.0.1
 
 - Fixed GitHub CI on Node 22 by removing an unsupported test-runner flag.

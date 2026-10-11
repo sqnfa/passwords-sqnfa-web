@@ -63,9 +63,15 @@ export async function publishPackage({
       stdio: ['ignore', 'pipe', 'pipe'],
     }),
 }) {
-  const [packed] = JSON.parse(npm(['pack', '--json', '--ignore-scripts']));
+  const output = JSON.parse(npm(['pack', '--json', '--ignore-scripts']));
+  // npm 12 keys artifacts by package name; earlier versions return an array.
+  const artifacts = Array.isArray(output)
+    ? output
+    : Object.values(output ?? {});
+  const [packed] = artifacts;
   if (
-    packed.name !== release.packageName ||
+    artifacts.length !== 1 ||
+    packed?.name !== release.packageName ||
     packed.version !== release.version ||
     !/^[a-zA-Z0-9_.-]+\.tgz$/.test(packed.filename)
   ) {

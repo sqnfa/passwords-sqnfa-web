@@ -79,6 +79,45 @@ test('publishes a stable tarball with provenance and no stored npm token', async
   ]);
 });
 
+test('publishes an artifact from npm 12 package-keyed pack output', async () => {
+  const fixture = artifact();
+  globalThis.fetch = async () => response(null, 404);
+  const npm = (args) => {
+    const output = fixture.npm(args);
+    return args[0] === 'pack'
+      ? JSON.stringify({[release.packageName]: JSON.parse(output)[0]})
+      : output;
+  };
+  const result = await publishPackage({...fixture, npm, release});
+  assert.equal(result.created, true);
+  assert.equal(result.filename, fixture.filename);
+  assert.equal(fixture.calls[1][0], 'publish');
+  assert.equal(fixture.calls[1][1], fixture.filename);
+});
+
+test('refuses empty or multiple packed artifacts before accessing the registry', async () => {
+  const fixture = artifact();
+  const [packed] = JSON.parse(fixture.npm(['pack']));
+  globalThis.fetch = async () =>
+    assert.fail('The registry must not be accessed');
+  for (const output of [
+    [],
+    {},
+    null,
+    [packed, packed],
+    {[release.packageName]: packed, another: packed},
+  ]) {
+    const npm = (args) => {
+      assert.equal(args[0], 'pack');
+      return JSON.stringify(output);
+    };
+    await assert.rejects(
+      publishPackage({...fixture, npm, release}),
+      /packed artifact does not match/
+    );
+  }
+});
+
 test('publishes prereleases to next', async () => {
   const version = '1.1.0-rc.1';
   const fixture = artifact(version);

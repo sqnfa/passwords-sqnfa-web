@@ -60,7 +60,7 @@ Validation runs before the App key is downloaded. Both Azure and GitHub check th
 
 The workflow file reaches GitHub with the first snapshot. If npm requires it to exist before saving the publisher, push the first release tag after completing the Azure/App setup, then configure the trusted publisher once `release.yml` appears in GitHub. If the first publish attempt failed before configuration was complete, rerun that GitHub Release workflow. The workflow creates the GitHub Release only after npm publication succeeds.
 
-The public GitHub repository allows npm provenance generation. The publish job installs the current npm CLI; trusted publishing requires npm 11.5.1+ and Node 22.14.0+. It rebuilds without cached dependencies and publishes the verified tarball with `--provenance`. Dependencies are public, so installation also needs no npm credentials.
+The public GitHub repository allows npm provenance generation. The publish job pins npm 12.2.0 instead of following `npm@latest`, so CLI updates are reviewed before they affect publication. This npm version requires Node 22.22.2+, 24.15.0+, or 26+; the runner uses Node 24. Trusted publishing requires npm 11.5.1+ and Node 22.14.0+. The job rebuilds without cached dependencies and publishes the verified tarball with `--provenance`. Dependencies are public, so installation also needs no npm credentials.
 
 ## Create a release
 

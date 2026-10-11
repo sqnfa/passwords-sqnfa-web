@@ -61,7 +61,7 @@ jobs:
         with:
           node-version: 24
           package-manager-cache: false
-      - run: npm install --global npm@latest
+      - run: npm install --global npm@12.2.0
       - run: node scripts/release/validate.mjs
       - run: npm ci --ignore-scripts
       - run: npm run build
