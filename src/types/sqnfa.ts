@@ -1,4 +1,4 @@
-import {Result} from '../result';
+import type {Result} from '../result.js';
 
 export interface HandlerSync {
   /**
@@ -27,5 +27,9 @@ export interface Handler {
 }
 
 export interface HaveibeenpwnedHttpClient {
+  /**
+   * Return Pwned Passwords response rows in suffix:count format.
+   * Request Add-Padding: true, apply a timeout, and reject HTTP failures.
+   */
   get(url: string): Promise<string[]>;
 }

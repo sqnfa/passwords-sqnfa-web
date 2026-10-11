@@ -1,79 +1,61 @@
 import {
   EmailBlackListHandler,
   EmailBlackListConfiguration,
-} from '../../src/handlers/email-blacklist-handler';
+} from '../../src/index';
 
-const email = 'john-doe@company.example.com';
+const handler = new EmailBlackListHandler(
+  new EmailBlackListConfiguration('john-doe@company.example.com')
+);
 
-describe('when adding an e-mail to the blacklist without using the sliding window', () => {
-  const emailTokenHandler = new EmailBlackListHandler({
-    email: email,
-    slidingWindow: 0,
-    minTokenLength: 0,
-  });
-  it('should only add all tokens to the blacklist.', () => {
-    ['john', 'doe', 'company', 'example'].forEach(password => {
-      const result = emailTokenHandler.handleSync(password);
-
-      const failures = result.getFailures();
-      expect(failures).toHaveLength(1);
-      expect(failures[0].rule).toBe('emailTokens');
-      expect(failures[0].expected).toBe(0);
-      expect(failures[0].actual).toBe(1);
-    });
-  });
-
-  it('should allow the tld to be used.', () => {
-    const result = emailTokenHandler.handleSync('com');
-
-    expect(result.isSuccess).toBeTruthy();
-  });
+it.each([
+  'john',
+  'doe',
+  'company',
+  'example',
+  'john-doe',
+  'john-doe@company.example.com',
+  'JOHN-DOE',
+])('rejects complete contextual values: %s', (password) => {
+  expect(handler.handleSync(password).getFailures()[0].rule).toBe(
+    'emailTokens'
+  );
 });
-describe('when adding an e-mail to the blacklist using the sliding window', () => {
-  const config = new EmailBlackListConfiguration(email, 5, 4);
-  const handler = new EmailBlackListHandler(config);
 
-  it('should block partial words based on a sliding window.', () => {
-    [
-      'john',
-      'company',
-      'example',
-      'compa',
-      'ompan',
-      'mpany',
-      'examp',
-      'xampl',
-      'ample',
-      'johnd',
-      'ohndo',
-      'hndoe',
-      'panye',
-      'anyex',
-      'nyexa',
-      'yexam',
-      'john-',
-      'ohn-d',
-      'hn-do',
-      'n-doe',
-      'pany.',
-      'any.e',
-      'ny.ex',
-      'y.exa',
-      '.exam',
-    ].forEach(password => {
-      const result = handler.handleSync(password);
+it.each([
+  'a company passphrase',
+  'john likes long passphrases',
+  '1john-doe2',
+  'com',
+  'compa',
+])('permits passwords containing contextual substrings: %s', (password) => {
+  expect(handler.handleSync(password).isSuccess).toBe(true);
+});
 
-      const failures = result.getFailures();
-      expect(failures).toHaveLength(1);
-      expect(failures[0].rule).toBe('emailTokens');
-      expect(failures[0].expected).toBe(0);
-      expect(failures[0].actual).toBe(1);
-    });
+it('filters derived tokens using a Unicode character minimum', () => {
+  const filtered = new EmailBlackListHandler({
+    email: 'john-doe@company.example.com',
+    minTokenLength: 4,
   });
+  expect(filtered.handleSync('doe').isSuccess).toBe(true);
+  expect(filtered.handleSync('john').isSuccess).toBe(false);
+});
 
-  it('should allow short words in the e-mail.', () => {
-    const result = handler.handleSync('doe');
-
-    expect(result.isSuccess).toBeTruthy();
+it('can add contextual values for another email address', () => {
+  const updated = new EmailBlackListHandler({
+    email: 'first@example.com',
+    minTokenLength: 4,
   });
+  updated.addEmailInformation('second@service.example', 4);
+  expect(updated.handleSync('second').isSuccess).toBe(false);
+  expect(updated.handleSync('long second passphrase').isSuccess).toBe(true);
+});
+
+it('rejects malformed context configuration', () => {
+  expect(
+    () => new EmailBlackListHandler({email: 'invalid', minTokenLength: 1})
+  ).toThrow();
+  expect(
+    () =>
+      new EmailBlackListHandler({email: 'user@example.com', minTokenLength: 0})
+  ).toThrow();
 });

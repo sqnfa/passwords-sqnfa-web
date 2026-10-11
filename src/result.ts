@@ -25,7 +25,7 @@ export class Result {
   public getPassword(): string {
     if (!this.isSuccess || this.password === undefined) {
       throw new Error(
-        'Invalid operation: Cannot retreive the password from a failed result.'
+        'Invalid operation: Cannot retrieve the password from a failed result.'
       );
     }
     return this.password;
@@ -34,7 +34,7 @@ export class Result {
   public getFailures(): Failure[] {
     if (this.isSuccess || !this.failures) {
       throw new Error(
-        'Invalid operation: Cannot retreive the failure from a successful result.'
+        'Invalid operation: Cannot retrieve the failure from a successful result.'
       );
     }
     return this.failures;

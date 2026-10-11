@@ -1,29 +1,24 @@
-import {BcryptConfiguration, BcryptHandler} from './handlers/bcrypt-handler';
 import {
   BlackListConfiguration,
   BlackListHandler,
-} from './handlers/blacklist-handler';
+} from './handlers/blacklist-handler.js';
 import {
   EmailBlackListConfiguration,
   EmailBlackListHandler,
-} from './handlers/email-blacklist-handler';
+} from './handlers/email-blacklist-handler.js';
 import {
   HaveibeenpwnedConfiguration,
   HaveibeenpwnedHandler,
-} from './handlers/haveibeenpwned-handler';
-import {LengthConfiguration, LengthHandler} from './handlers/length-handler';
-import {RegexConfiguration, RegexHandler} from './handlers/regex-handler';
-import {Sha512Handler} from './handlers/sha512-handler';
-import {Failure, Result} from './result';
-import {Handler, HandlerSync} from './types/sqnfa';
+} from './handlers/haveibeenpwned-handler.js';
+import {LengthConfiguration, LengthHandler} from './handlers/length-handler.js';
+import {RegexConfiguration, RegexHandler} from './handlers/regex-handler.js';
+import {Result} from './result.js';
+import type {Failure} from './result.js';
+import type {Handler, HandlerSync} from './types/sqnfa.js';
 
 /**
- * Passwords are still essential for most applications. This also includes web applications.
- * This library implements the recommendations that apply to client-side password handling
- * from the National Institute of Standards and Technology (NIST) and the Open Web Application
- * Security Project (OWASP). The purpose of this library is to provide an easy pluggable
- * client-side password preprocessor. It is not a substitute for the proper handling of passwords
- * in the backend and should only be considered an extra layer.
+ * Configurable client-side password checks and asynchronous extension support.
+ * See docs/password-guidance.md for the NIST/OWASP policy mapping and server responsibilities.
  *
  * @license passwords-sqnfa-web Copyright 2022 Martin Storgaard Dieu <martin@storgaarddieu.com>
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,13 +43,15 @@ export class PasswordsSqnfaWeb implements Handler {
   public statistics: {[key: string]: number} = {};
 
   private handlers: [Handler | HandlerSync, boolean][] = [];
-  private failures: Failure[] = [];
 
   async handle(password: string): Promise<Result> {
-    this.failures = [];
-    this.statistics = {};
+    password = password.normalize('NFC');
+    const failures: Failure[] = [];
+    const statistics: Record<string, number> = {};
+    // Snapshot configuration so additions only affect subsequent calls.
+    const handlers = [...this.handlers];
     const thisStartTime = performance.now();
-    for (const entity of this.handlers) {
+    for (const entity of handlers) {
       let result: Result;
       const handler = entity[0];
       const stopOnFailure = entity[1];
@@ -65,54 +62,38 @@ export class PasswordsSqnfaWeb implements Handler {
       } else {
         result = await handler.handle(password);
       }
-      this.statistics[handler.name] = ~~(performance.now() - handlerStartTime);
+      statistics[handler.name] = ~~(performance.now() - handlerStartTime);
 
       if (result.isSuccess) {
-        password = result.getPassword();
+        password = result.getPassword().normalize('NFC');
       } else {
-        result.getFailures().forEach(failure => this.failures.push(failure));
+        result.getFailures().forEach((failure) => failures.push(failure));
       }
 
-      if (stopOnFailure && this.failures.length > 0) {
+      if (stopOnFailure && failures.length > 0) {
         break;
       }
     }
 
     const thisEndTime = performance.now();
-    this.statistics[this.name] = ~~(thisEndTime - thisStartTime);
-    if (this.failures.length > 0) {
-      return Result.fail(this.failures);
+    statistics[this.name] = ~~(thisEndTime - thisStartTime);
+    this.statistics = statistics;
+    if (failures.length > 0) {
+      return Result.fail(failures);
     }
     return Result.ok(password);
   }
 
   /**
-   * Bring your own handler. Any instance that implements the HandlerSync interface can be added.
-   * Please bear in mind that high password complexity requriements does not always yield
+   * Bring your own handler. Any instance that implements Handler or HandlerSync can be added.
+   * Please bear in mind that high password complexity requirements does not always yield
    * highly secure passwords chosen by the user.
    *
-   * @param handler A syncronous implementaion of the handler interface.
+   * @param handler A synchronous or asynchronous implementation of a handler contract.
    * @param stopOnFailure If true, the execution will stop, if any failures has happened to this point.
    * @returns The current instance of PasswordsSqnfaWeb which allows chaining of the use* methods.
    */
-  public useSync(
-    handler: HandlerSync,
-    stopOnFailure = false
-  ): PasswordsSqnfaWeb {
-    this.handlers.push([handler, stopOnFailure]);
-    return this;
-  }
-
-  /**
-   * Bring your own handler. Any instance that implements the Handler interface can be added.
-   * Please bear in mind that high password complexity requriements does not always yield
-   * highly secure passwords chosen by the user.
-   *
-   * @param handler An asyncronous implementaion of the handler interface.
-   * @param stopOnFailure If true, the execution will stop, if any failures has happened to this point.
-   * @returns The current instance of PasswordsSqnfaWeb which allows chaining of the use* methods.
-   */
-  public use(handler: Handler, stopOnFailure = false): PasswordsSqnfaWeb {
+  public use(handler: Handler | HandlerSync, stopOnFailure = true): this {
     this.handlers.push([handler, stopOnFailure]);
     return this;
   }
@@ -126,9 +107,9 @@ export class PasswordsSqnfaWeb implements Handler {
    */
   public useLengthHandler(
     config?: LengthConfiguration,
-    stopOnFailure = false
-  ): PasswordsSqnfaWeb {
-    return this.useSync(new LengthHandler(config), stopOnFailure);
+    stopOnFailure = true
+  ): this {
+    return this.use(new LengthHandler(config), stopOnFailure);
   }
 
   /**
@@ -140,9 +121,9 @@ export class PasswordsSqnfaWeb implements Handler {
    */
   public useBlackListHandler(
     config: BlackListConfiguration,
-    stopOnFailure = false
-  ): PasswordsSqnfaWeb {
-    return this.useSync(new BlackListHandler(config), stopOnFailure);
+    stopOnFailure = true
+  ): this {
+    return this.use(new BlackListHandler(config), stopOnFailure);
   }
 
   /**
@@ -154,9 +135,9 @@ export class PasswordsSqnfaWeb implements Handler {
    */
   public useRegexHandler(
     config: RegexConfiguration,
-    stopOnFailure = false
-  ): PasswordsSqnfaWeb {
-    return this.useSync(new RegexHandler(config), stopOnFailure);
+    stopOnFailure = true
+  ): this {
+    return this.use(new RegexHandler(config), stopOnFailure);
   }
 
   /**
@@ -168,9 +149,9 @@ export class PasswordsSqnfaWeb implements Handler {
    */
   public useEmailBlackListHandler(
     config: EmailBlackListConfiguration,
-    stopOnFailure = false
-  ): PasswordsSqnfaWeb {
-    return this.useSync(new EmailBlackListHandler(config), stopOnFailure);
+    stopOnFailure = true
+  ): this {
+    return this.use(new EmailBlackListHandler(config), stopOnFailure);
   }
 
   /**
@@ -182,32 +163,31 @@ export class PasswordsSqnfaWeb implements Handler {
    */
   public useHaveibeenpwnedHandler(
     config: HaveibeenpwnedConfiguration,
-    stopOnFailure = false
-  ): PasswordsSqnfaWeb {
+    stopOnFailure = true
+  ): this {
     return this.use(new HaveibeenpwnedHandler(config), stopOnFailure);
   }
-
-  /**
-   * @see Sha512Handler for details.
-   *
-   * @param stopOnFailure If true, the execution will stop, if any failures has happened to this point.
-   * @returns The current instance of PasswordsSqnfaWeb which allows chaining of the use* methods.
-   */
-  public useSha512Handler(stopOnFailure = false): PasswordsSqnfaWeb {
-    return this.useSync(new Sha512Handler(), stopOnFailure);
-  }
-
-  /**
-   * @see BcryptHandler for details.
-   *
-   * @param config @see BcryptConfiguration for details.
-   * @param stopOnFailure If true, the execution will stop, if any failures has happened to this point.
-   * @returns The current instance of PasswordsSqnfaWeb which allows chaining of the use* methods.
-   */
-  public useBcryptHandler(
-    config: BcryptConfiguration,
-    stopOnFailure = false
-  ): PasswordsSqnfaWeb {
-    return this.use(new BcryptHandler(config), stopOnFailure);
-  }
 }
+
+// The package root is the supported API for consumers and optional extensions.
+export {Result} from './result.js';
+export type {Failure} from './result.js';
+export type {
+  Handler,
+  HandlerSync,
+  HaveibeenpwnedHttpClient,
+} from './types/sqnfa.js';
+export {
+  BlackListConfiguration,
+  BlackListHandler,
+} from './handlers/blacklist-handler.js';
+export {
+  EmailBlackListConfiguration,
+  EmailBlackListHandler,
+} from './handlers/email-blacklist-handler.js';
+export {
+  HaveibeenpwnedConfiguration,
+  HaveibeenpwnedHandler,
+} from './handlers/haveibeenpwned-handler.js';
+export {LengthConfiguration, LengthHandler} from './handlers/length-handler.js';
+export {RegexConfiguration, RegexHandler} from './handlers/regex-handler.js';

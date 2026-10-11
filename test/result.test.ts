@@ -16,8 +16,8 @@ describe('a successful result', () => {
     expect(result.getPassword()).toBe(password);
   });
   it('should not have the failure attribute set.', () => {
-    expect(() => result.getFailures()).toThrowError(
-      'Invalid operation: Cannot retreive the failure from a successful result.'
+    expect(() => result.getFailures()).toThrow(
+      'Invalid operation: Cannot retrieve the failure from a successful result.'
     );
   });
 });
@@ -33,8 +33,8 @@ describe('a failure result', () => {
     expect(result.getFailures()).toContain(failure);
   });
   it('should reject accessing the password.', () => {
-    expect(() => result.getPassword()).toThrowError(
-      'Invalid operation: Cannot retreive the password from a failed result.'
+    expect(() => result.getPassword()).toThrow(
+      'Invalid operation: Cannot retrieve the password from a failed result.'
     );
   });
 });

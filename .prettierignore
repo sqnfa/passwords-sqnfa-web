@@ -1,0 +1,8 @@
+node_modules
+build
+coverage
+package-lock.json
+examples/angular/package-lock.json
+examples/angular/dist
+examples/angular/.angular
+*.tgz

@@ -1,0 +1,74 @@
+name: release-$(Date:yyyyMMdd)$(Rev:.r)
+
+trigger:
+  branches:
+    exclude: ['*']
+  tags:
+    include: ['v*']
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  githubRepository: sqnfa/passwords-sqnfa-web
+  githubMirrorBranch: main
+
+stages:
+  - stage: Validate
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
+    jobs:
+      - job: Check
+        steps:
+          - checkout: self
+            fetchDepth: 0
+            fetchTags: true
+            persistCredentials: false
+          - task: UseNode@1
+            inputs:
+              version: 24.x
+          - script: node scripts/release/validate.mjs
+            displayName: Validate annotated tag and package version
+            env:
+              GITHUB_REPOSITORY: $(githubRepository)
+          - script: npm ci
+          - script: npm run check
+          - script: npm ci --prefix examples/angular
+          - script: npm run build:angular
+          - script: npx playwright install --with-deps chromium
+          - script: npm run test:examples
+          - script: npm audit
+          - script: npm audit --prefix examples/angular
+
+  - stage: Mirror
+    dependsOn: Validate
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
+    lockBehavior: sequential
+    variables:
+      - group: github-release-mirror
+    jobs:
+      - deployment: Snapshot
+        environment: github-release-mirror
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                  fetchDepth: 0
+                  fetchTags: true
+                  persistCredentials: false
+                - task: UseNode@1
+                  inputs:
+                    version: 24.x
+                - task: DownloadSecureFile@1
+                  name: githubAppKey
+                  inputs:
+                    secureFile: github-release-mirror.pem
+                - script: node scripts/release/mirror.mjs
+                  displayName: Push one snapshot commit and annotated tag to GitHub
+                  env:
+                    GITHUB_REPOSITORY: $(githubRepository)
+                    GITHUB_MIRROR_BRANCH: $(githubMirrorBranch)
+                    GITHUB_APP_ID: $(githubAppId)
+                    GITHUB_INSTALLATION_ID: $(githubInstallationId)
+                    GITHUB_APP_PRIVATE_KEY_PATH: $(githubAppKey.secureFilePath)

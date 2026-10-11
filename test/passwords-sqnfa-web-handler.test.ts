@@ -5,9 +5,7 @@ import {
   BlackListHandler,
 } from '../src/handlers/blacklist-handler';
 import {HaveibeenpwnedHandler} from '../src/handlers/haveibeenpwned-handler';
-import {MockHttpClient} from './handlers/haveibeenpwned-handler.test';
-import {Sha512Handler} from '../src/handlers/sha512-handler';
-import {BcryptHandler} from '../src/handlers/bcrypt-handler';
+import {MockHttpClient} from './mock-http-client';
 import {
   EmailBlackListConfiguration,
   EmailBlackListHandler,
@@ -15,9 +13,9 @@ import {
 
 describe('a successful handling with the chain of responsibility', () => {
   const handler = new PasswordsSqnfaWeb()
-    .useSync(new LengthHandler())
-    .useSync(new LengthHandler({minLength: 0, maxByteSize: 5000}))
-    .useBlackListHandler(new BlackListConfiguration([], 0.75));
+    .use(new LengthHandler())
+    .use(new LengthHandler({minLength: 0, maxByteSize: 5000}))
+    .useBlackListHandler(new BlackListConfiguration([]));
   it('should return a successful result.', async () => {
     const result = await handler.handle('correct-horse-battery-staple');
 
@@ -27,9 +25,9 @@ describe('a successful handling with the chain of responsibility', () => {
 
 describe('a failed handling with the chain of responsibility without stop on failure', () => {
   const handler = new PasswordsSqnfaWeb()
-    .useSync(new LengthHandler({minLength: 0, maxByteSize: 1}))
-    .useSync(new LengthHandler({minLength: 5000, maxByteSize: 5000}), true)
-    .useSync(new LengthHandler({minLength: 0, maxByteSize: 1}));
+    .use(new LengthHandler({minLength: 0, maxByteSize: 1}), false)
+    .use(new LengthHandler({minLength: 5000, maxByteSize: 5000}), true)
+    .use(new LengthHandler({minLength: 0, maxByteSize: 1}));
   it('should only contain failures up until the point to stop.', async () => {
     const result = await handler.handle('correct-horse-battery-staple');
 
@@ -41,72 +39,54 @@ describe('a failed handling with the chain of responsibility without stop on fai
 describe('a normal usage', () => {
   const lengthHandler = new LengthHandler();
   const blacklistHandler = new BlackListHandler(
-    new BlackListConfiguration(['sqnfa', 'password', 'web'], 0.75)
+    new BlackListConfiguration(['sqnfa', 'password', 'web'])
   );
   const emailBlackListHandler = new EmailBlackListHandler(
-    new EmailBlackListConfiguration('john-doe@example.com', 0, 0)
+    new EmailBlackListConfiguration('john-doe@example.com')
   );
   const haveibeenpwnedHandler = new HaveibeenpwnedHandler({
     httpClient: new MockHttpClient(),
     pwnedPasswordsUrl: '',
   });
-  const sha512Handler = new Sha512Handler();
-  const bcryptSalt = '$2a$12$RNbCt.Je2GAP4ub8FyX5le';
-  const bcryptHandler = new BcryptHandler({salt: bcryptSalt});
   const handler = new PasswordsSqnfaWeb()
-    .useSync(lengthHandler)
-    .useSync(blacklistHandler, true)
-    .useSync(emailBlackListHandler)
-    .use(haveibeenpwnedHandler, true)
-    .useSync(sha512Handler)
-    .use(bcryptHandler);
+    .use(lengthHandler)
+    .use(blacklistHandler, true)
+    .use(emailBlackListHandler)
+    .use(haveibeenpwnedHandler, true);
 
-  it('should use all handlers and hash the password.', async () => {
-    const lengthHandlerSpy = jest.spyOn(lengthHandler, 'handleSync');
-    const blacklistHandlerSpy = jest.spyOn(blacklistHandler, 'handleSync');
-    const emailBlackListHandlerSpy = jest.spyOn(
+  it('should run all validators and preserve the original password.', async () => {
+    const lengthHandlerSpy = vi.spyOn(lengthHandler, 'handleSync');
+    const blacklistHandlerSpy = vi.spyOn(blacklistHandler, 'handleSync');
+    const emailBlackListHandlerSpy = vi.spyOn(
       emailBlackListHandler,
       'handleSync'
     );
-    const haveibeenpwnedHandlerSpy = jest.spyOn(
-      haveibeenpwnedHandler,
-      'handle'
-    );
-    const sha512HandlerSpy = jest.spyOn(sha512Handler, 'handleSync');
-    const bcryptHandlerSpy = jest.spyOn(bcryptHandler, 'handle');
+    const haveibeenpwnedHandlerSpy = vi.spyOn(haveibeenpwnedHandler, 'handle');
     const password = '@ecgS=C63fz>}f`b3_G3';
 
     const result = await handler.handle(password);
 
-    expect(lengthHandlerSpy).toBeCalledWith(password);
-    expect(blacklistHandlerSpy).toBeCalledWith(password);
-    expect(emailBlackListHandlerSpy).toBeCalledWith(password);
-    expect(haveibeenpwnedHandlerSpy).toBeCalledWith(password);
-    expect(sha512HandlerSpy).toBeCalledWith(password);
-    expect(bcryptHandlerSpy).toBeCalledWith(
-      'xLkyfoQIFWkdySxClgzbDE+YEn7GI0xwkoBCOyL1z0ozQdloTVS04k1/bIaYFuouMqPq0rpD'
-    );
-
+    expect(lengthHandlerSpy).toHaveBeenCalledWith(password);
+    expect(blacklistHandlerSpy).toHaveBeenCalledWith(password);
+    expect(emailBlackListHandlerSpy).toHaveBeenCalledWith(password);
+    expect(haveibeenpwnedHandlerSpy).toHaveBeenCalledWith(password);
     expect(result.isSuccess).toBeTruthy();
-    expect(result.getPassword().startsWith(bcryptSalt)).toBeTruthy();
+    expect(result.getPassword()).toBe(password);
   });
 
   it('should work on an empty password', async () => {
     const emptyHandler = new PasswordsSqnfaWeb()
       .useLengthHandler()
-      .useBlackListHandler({caseInsensitiveWords: [], ratioThreshold: 0.75})
+      .useBlackListHandler({caseInsensitiveWords: []})
       .useRegexHandler({regExps: []})
       .useEmailBlackListHandler({
         email: 'john@example.com',
-        slidingWindow: 0,
-        minTokenLength: 0,
+        minTokenLength: 1,
       })
       .useHaveibeenpwnedHandler({
         pwnedPasswordsUrl: '',
         httpClient: new MockHttpClient(),
-      })
-      .useSha512Handler()
-      .useBcryptHandler({salt: '$2a$08$RNbCt.Je2GAP4ub8FyX5le'});
+      });
 
     const result = await emptyHandler.handle('');
 

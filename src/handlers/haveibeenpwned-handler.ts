@@ -1,10 +1,9 @@
-import {Result} from '../result';
-import {Handler, HaveibeenpwnedHttpClient} from '../types/sqnfa';
-import * as jshashes from 'jshashes';
+import {Result} from '../result.js';
+import type {Handler, HaveibeenpwnedHttpClient} from '../types/sqnfa.js';
 
 export class HaveibeenpwnedConfiguration {
   /**
-   * The enpoint to he pwned passwords range search that ensures k-anonymity while looking for breaches.
+   * The Pwned Passwords range API endpoint.
    */
   public pwnedPasswordsUrl = 'https://api.pwnedpasswords.com/range/';
   constructor(
@@ -18,36 +17,45 @@ export class HaveibeenpwnedConfiguration {
 export class HaveibeenpwnedHandler implements Handler {
   public readonly name = 'HaveibeenpwnedHandler';
 
-  /**
-   * NIST 800-63B:
-   * Password complexity: Users’ password choices are very predictable,
-   * so attackers are likely to guess passwords that have been successful
-   * in the past. For this reason, it is recommended that passwords chosen
-   * by users be compared against a “black list” of unacceptable passwords.
-   * This list should include passwords from previous breach corpuses.
-   *
-   * The web service haveibeenpwned.com is a free resource for anyone to
-   * quickly assess if they may have been put at risk due to an online
-   * account of theirs having been compromised or "pwned" in a data breach.
-   */
+  /** Check passwords against the Pwned Passwords range API using a SHA-1 prefix. */
   constructor(private config: HaveibeenpwnedConfiguration) {}
 
   /**
-   * Uses the pwned passwords range search that ensures k-anonymity while looking for breaches.
+   * Sends only a five-character hash prefix and compares returned suffixes locally.
    *
    * @param password The password to check.
    * @returns Successful result if the password is not found or a failure otherwise.
    */
   async handle(password: string): Promise<Result> {
-    const hashedPassword = new jshashes.SHA1().setUpperCase(true).hex(password);
+    password = password.normalize('NFC');
+    // SHA-1 is only the lookup identifier required by the Pwned Passwords API.
+    const digest = await globalThis.crypto.subtle.digest(
+      'SHA-1',
+      new TextEncoder().encode(password)
+    );
+    const hashedPassword = Array.from(new Uint8Array(digest), (byte) =>
+      byte.toString(16).padStart(2, '0')
+    )
+      .join('')
+      .toUpperCase();
     const url = this.constructUrl(hashedPassword);
     const pwnedPasswordHashes = await this.config.httpClient.get(url);
 
     const predicate = hashedPassword.substring(5);
-    const pwnedValue = pwnedPasswordHashes.find(value =>
-      value.startsWith(predicate)
-    );
+    let pwnedValue = false;
+    let validRows = 0;
+    for (const value of pwnedPasswordHashes) {
+      const row = value.trim();
+      if (!row) continue;
+      const match = /^([a-f\d]{35}):(\d+)$/i.exec(row);
+      if (!match) throw new Error('Invalid Pwned Passwords response row.');
+      validRows++;
+      if (match[1].toUpperCase() === predicate && Number(match[2]) > 0) {
+        pwnedValue = true;
+      }
+    }
 
+    if (validRows === 0) throw new Error('Empty Pwned Passwords response.');
     if (pwnedValue) {
       return Result.fail({
         handler: this.name,

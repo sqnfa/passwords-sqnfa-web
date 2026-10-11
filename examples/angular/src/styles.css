@@ -1,0 +1,41 @@
+body {
+  font: 16px/1.6 system-ui;
+  background: #f3f5f9;
+  color: #19243c;
+  margin: 0;
+}
+main {
+  max-width: 36rem;
+  margin: 4rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 1rem;
+}
+label,
+input:not([type='checkbox']),
+button {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+}
+input:not([type='checkbox']),
+button {
+  padding: 0.8rem;
+  margin: 0.5rem 0 1rem;
+  font: inherit;
+}
+button {
+  background: #273fa5;
+  color: white;
+  border: 0;
+  border-radius: 0.4rem;
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+pre {
+  white-space: pre-wrap;
+  font-size: 0.85rem;
+}

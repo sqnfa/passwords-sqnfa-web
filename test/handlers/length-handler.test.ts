@@ -14,7 +14,7 @@ describe('a valid password', () => {
 });
 
 describe('an invalid password', () => {
-  // Each of the three wise monkeys take two charactar space per monkey in UTF16 and 4 bytes of space each in UTF8.
+  // Each emoji is one Unicode code point and four UTF-8 bytes.
   const threeWiseMonkeys = '🙈🙉🙊';
 
   it('should reject short passwords.', () => {
@@ -25,8 +25,8 @@ describe('an invalid password', () => {
 
     expect(failures).toHaveLength(1);
     expect(failures[0].rule).toBe('minLength');
-    expect(failures[0].expected).toBe(8);
-    expect(failures[0].actual).toBe(6);
+    expect(failures[0].expected).toBe(15);
+    expect(failures[0].actual).toBe(3);
   });
 
   it('should reject large passwords.', () => {
@@ -39,5 +39,23 @@ describe('an invalid password', () => {
     expect(failures[0].rule).toBe('maxByteSize');
     expect(failures[0].expected).toBe(10);
     expect(failures[0].actual).toBe(12);
+  });
+});
+
+it('accepts 15 Unicode code points without counting surrogate pairs twice', () => {
+  const handler = new LengthHandler();
+  expect(handler.handleSync('🚀'.repeat(14)).isSuccess).toBe(false);
+  expect(handler.handleSync('🚀'.repeat(15)).getPassword()).toBe(
+    '🚀'.repeat(15)
+  );
+});
+
+it('accepts passwords at the byte limit and rejects passwords exceeding it', () => {
+  const handler = new LengthHandler();
+  expect(handler.handleSync('🚀'.repeat(256)).isSuccess).toBe(true);
+  expect(handler.handleSync('🚀'.repeat(257)).getFailures()[0]).toMatchObject({
+    rule: 'maxByteSize',
+    expected: 1024,
+    actual: 1028,
   });
 });
