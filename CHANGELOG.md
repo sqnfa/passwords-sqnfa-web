@@ -1,5 +1,9 @@
 # Release notes
 
+## 1.0.1
+
+- Fixed GitHub CI on Node 22 by removing an unsupported test-runner flag.
+
 ## 1.0.0
 
 - Configurable password validation with a 15-code-point minimum and 1,024-byte default limit.

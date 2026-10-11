@@ -1,6 +1,6 @@
 {
   "name": "passwords-sqnfa-web",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Martin Storgaard Dieu <info@sqnfa.com>",
   "description": "A pluggable client-side password validation pipeline with synchronous and asynchronous extension support.",
   "main": "./build/index.cjs",
@@ -43,7 +43,7 @@
     "build:angular": "npm run build && npm --prefix examples/angular run build",
     "prepare": "npm run build",
     "test:examples": "node scripts/examples-smoke.mjs",
-    "test:release": "node --test --test-isolation=none test/release/*.test.mjs"
+    "test:release": "node --test test/release/*.test.mjs"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
