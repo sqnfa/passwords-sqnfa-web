@@ -2,7 +2,7 @@ import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
-import {githubRequest} from './github-app.mjs';
+import {githubRequest} from './github-api.mjs';
 
 function compareVersions(left, right) {
   const parts = (value) => {

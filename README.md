@@ -27,7 +27,7 @@ if (result.isSuccess) {
 
 Handlers are registered explicitly and run in order. `stopOnFailure` defaults to `true`; a failed check stops further work. Pass `false` to collect failures across validation stages. Complete validation successfully before invoking authentication or other network work.
 
-The pipeline and built-in handlers normalize passwords to Unicode NFC. Password case and leading/trailing whitespace are kept. Passwords are never truncated. Use the same normalization at registration and authentication, including your server or OPAQUE adapter.
+The pipeline and built-in handlers normalize passwords to Unicode NFC. Password case and leading/trailing whitespace are kept. Passwords are never truncated. Use the same normalization at registration and authentication, including on your server.
 
 ESM imports, CommonJS `require()`, TypeScript declarations, and an ES2022 browser script are provided. Load `build/passwords-sqnfa-web.min.js` to use `new PasswordsSqnfaWeb.PasswordsSqnfaWeb()` in a plain HTML page. For CommonJS, use `const {PasswordsSqnfaWeb} = require('passwords-sqnfa-web')`.
 
@@ -64,9 +64,9 @@ Configuration classes can be instantiated or supplied as structurally matching o
 
 Request padded responses with `Add-Padding: true`. Perform breach checking on submission, not on every keystroke, and never send the complete password or complete hash to the range endpoint. The samples supply Fetch and Angular `HttpClient` adapters. The endpoint needs no API key or subscription. OWASP recommends this service for breached-password screening; see the [API and privacy review](docs/password-guidance.md#pwned-passwords-integration).
 
-## Optional authentication extensions
+## Custom handlers
 
-Public handler contracts, result types, and fluent `this` return types support separately implemented authentication adapters:
+Public handler contracts, result types, and fluent `this` return types support custom handlers and subclasses:
 
 ```typescript
 import {PasswordsSqnfaWeb} from 'passwords-sqnfa-web';
@@ -78,8 +78,6 @@ class AuthenticationPipeline extends PasswordsSqnfaWeb {
   }
 }
 ```
-
-An optional OPAQUE package can provide its protocol adapter and a `useOpaque()` convenience method. It must define registration/login exchanges, server endpoints, per-attempt state, protocol parameters, and a separate typed session API. Supply the NFC-normalized password consistently to the selected implementation. Session keys and protocol messages must not be placed in `getPassword()`, policy failures, or timing statistics. Protocol implementation and deployment need their own security review; installing an adapter does not establish NIST compliance or phishing resistance.
 
 ## Samples
 
@@ -121,7 +119,7 @@ CI verifies the library, Angular build, browser flows, and dependency audits on 
 
 ## Releases
 
-Push an annotated `vX.Y.Z` tag to Azure DevOps to publish one snapshot commit and matching annotated tag to GitHub. GitHub Actions publishes the package to npm through trusted publishing and creates a GitHub Release from the tag's notes. Azure development history stays in Azure. See [release setup and credential locations](docs/releasing.md).
+GitHub Actions publishes annotated `vX.Y.Z` tags to npm through trusted publishing and creates a GitHub Release from the tag's notes. See [release setup](docs/releasing.md).
 
 ## License
 

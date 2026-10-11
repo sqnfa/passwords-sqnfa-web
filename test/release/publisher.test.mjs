@@ -1,13 +1,9 @@
 import assert from 'node:assert/strict';
 import {afterEach, test} from 'node:test';
-import {createHash, generateKeyPairSync, verify} from 'node:crypto';
+import {createHash} from 'node:crypto';
 import {mkdtempSync, rmSync, writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {
-  installationToken,
-  gitAuthentication,
-} from '../../scripts/release/github-app.mjs';
 import {
   assertGithubTag,
   assertRepository,
@@ -272,48 +268,6 @@ test('retries verify an existing GitHub Release without overwriting its notes', 
       release,
     }),
     /different notes/
-  );
-});
-
-test('mints a valid short-lived App JWT and restricts the installation token to the mirror repository', async () => {
-  const {privateKey, publicKey} = generateKeyPairSync('rsa', {
-    modulusLength: 2048,
-  });
-  let request;
-  globalThis.fetch = async (_url, options) => {
-    request = options;
-    return response({token: 'short-lived-test-token'});
-  };
-  const token = await installationToken({
-    appId: '123',
-    installationId: '456',
-    privateKey,
-    repository: 'sqnfa/passwords-sqnfa-web',
-  });
-  assert.equal(token, 'short-lived-test-token');
-  const jwt = request.headers.Authorization.slice('Bearer '.length);
-  const [header, payload, signature] = jwt.split('.');
-  assert.equal(
-    verify(
-      'RSA-SHA256',
-      Buffer.from(`${header}.${payload}`),
-      publicKey,
-      Buffer.from(signature, 'base64url')
-    ),
-    true
-  );
-  const claims = JSON.parse(Buffer.from(payload, 'base64url'));
-  assert.equal(claims.iss, '123');
-  assert.ok(claims.exp - claims.iat <= 600);
-  assert.deepEqual(JSON.parse(request.body), {
-    repositories: ['passwords-sqnfa-web'],
-    permissions: {contents: 'write', workflows: 'write'},
-  });
-  const configuration = gitAuthentication(token, 'sqnfa/passwords-sqnfa-web');
-  assert.ok(
-    Object.values(configuration).includes(
-      'http.https://github.com/sqnfa/passwords-sqnfa-web.git.extraHeader'
-    )
   );
 });
 

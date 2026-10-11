@@ -1,5 +1,9 @@
 # Release notes
 
+## 1.0.3
+
+- Updated public documentation to describe the available password-validation features and GitHub-to-npm release workflow.
+
 ## 1.0.2
 
 - Fixed npm publication with npm 12's package-keyed `npm pack --json` output while retaining support for earlier CLI versions.
@@ -19,4 +23,4 @@
 - Public TypeScript declarations, ESM, CommonJS, and browser builds with no runtime npm dependencies.
 - Vanilla JavaScript and Angular 21 LTS samples with password-manager support, visibility controls, and rejection guidance.
 - TypeScript 7.0.2 tooling, standards regression tests, browser verification, dependency audits, and CI.
-- Documented NIST SP 800-63B-4 and OWASP policy mapping and optional OPAQUE integration boundaries.
+- Documented NIST SP 800-63B-4 and OWASP policy mapping and server responsibilities.
